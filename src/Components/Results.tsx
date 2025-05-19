@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 
 const pageStyle: React.CSSProperties = {
   backgroundColor: "#262d7d",
@@ -14,12 +14,13 @@ const containerStyle: React.CSSProperties = {
   backgroundColor: "white",
   color: "#262d7d",
   borderRadius: 16,
-  padding: 30,
-  maxWidth: 900,
+  padding: "40px 50px",
+  maxWidth: 1000,
   width: "100%",
   border: "2px solid #262d7d",
   display: "flex",
-  gap: 30,
+  gap: 40,
+  boxSizing: "border-box",
 };
 
 const leftPanelStyle: React.CSSProperties = {
@@ -35,8 +36,9 @@ const rightPanelStyle: React.CSSProperties = {
 
 const titleStyle: React.CSSProperties = {
   fontWeight: "bold",
-  fontSize: 22,
-  marginBottom: 24,
+  fontSize: 26,
+  marginBottom: 32,
+  lineHeight: 1.2,
 };
 
 const backLinkStyle: React.CSSProperties = {
@@ -48,7 +50,7 @@ const backLinkStyle: React.CSSProperties = {
 };
 
 const formStyle: React.CSSProperties = {
-  marginBottom: 40,
+  marginBottom: 50,
 };
 
 const labelStyle: React.CSSProperties = {
@@ -59,24 +61,25 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: 10,
-  borderRadius: 6,
+  padding: "14px 16px",
+  borderRadius: 8,
   border: "1px solid #ccc",
-  marginBottom: 20,
-  fontSize: 16,
+  marginBottom: 24,
+  fontSize: 18,
   boxSizing: "border-box",
+  lineHeight: 1.4,
 };
 
 const buttonStyle: React.CSSProperties = {
   backgroundColor: "#262d7d",
   color: "white",
-  padding: "12px 0",
+  padding: "14px 0",
   width: "100%",
   border: "none",
-  borderRadius: 6,
+  borderRadius: 8,
   cursor: "pointer",
   fontWeight: "bold",
-  fontSize: 16,
+  fontSize: 18,
 };
 
 const tableStyle: React.CSSProperties = {
@@ -111,42 +114,75 @@ interface Resultado {
   nombre: string;
   evaluacion: string;
   puntaje: number;
+  fecha: string;
+  archivoPDF?: File;
 }
 
 export default function Results() {
-  // Estado para resultados guardados
+  // Estado para resultados
   const [resultados, setResultados] = useState<Resultado[]>([]);
 
-  // Estados para formulario de nuevo resultado
+  // Estados formulario
   const [nombre, setNombre] = useState("");
   const [evaluacion, setEvaluacion] = useState("");
   const [puntaje, setPuntaje] = useState("");
+  const [fecha, setFecha] = useState("");
+  const [archivoPDF, setArchivoPDF] = useState<File | null>(null);
 
-  // Función para agregar resultado desde formulario
-  const handleAgregar = () => {
-    if (!nombre || !evaluacion || !puntaje) {
-      alert("Por favor completa todos los campos");
+  // Manejar archivo PDF
+  const handleArchivoChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      setArchivoPDF(null);
       return;
     }
+    const file = e.target.files[0];
+    if (file.type !== "application/pdf") {
+      alert("Solo se permiten archivos PDF.");
+      e.target.value = "";
+      setArchivoPDF(null);
+      return;
+    }
+    setArchivoPDF(file);
+  };
+
+  // Agregar resultado
+  const handleAgregar = () => {
+    if (!nombre || !evaluacion || !puntaje || !fecha) {
+      alert("Por favor completa todos los campos.");
+      return;
+    }
+    if (!archivoPDF) {
+      alert("Por favor selecciona un archivo PDF.");
+      return;
+    }
+
     const puntajeNum = Number(puntaje);
     if (isNaN(puntajeNum) || puntajeNum < 0 || puntajeNum > 100) {
-      alert("Puntaje debe ser un número entre 0 y 100");
+      alert("Puntaje debe ser un número entre 0 y 100.");
       return;
     }
-    setResultados([...resultados, { nombre, evaluacion, puntaje: puntajeNum }]);
+
+    // Agregar resultado nuevo (archivo se guarda solo en estado, backend se implementa aparte)
+    setResultados([
+      ...resultados,
+      { nombre, evaluacion, puntaje: puntajeNum, fecha, archivoPDF },
+    ]);
+
+    // Limpiar formulario
     setNombre("");
     setEvaluacion("");
     setPuntaje("");
+    setFecha("");
+    setArchivoPDF(null);
   };
 
-  // Función para regresar a Dashboard
+  // Regresar a dashboard
   const handleRegresar = () => {
     window.history.back();
   };
 
   return (
     <div style={pageStyle}>
-      {/* Contenedor principal blanco con bordes azules */}
       <div style={containerStyle}>
         {/* Panel izquierdo: Formulario y tabla */}
         <div style={leftPanelStyle}>
@@ -158,7 +194,7 @@ export default function Results() {
           {/* Título */}
           <h2 style={titleStyle}>Resultados de Evaluaciones</h2>
 
-          {/* Formulario para agregar resultado */}
+          {/* Formulario */}
           <div style={formStyle}>
             <label style={labelStyle}>Nombre</label>
             <input
@@ -189,24 +225,42 @@ export default function Results() {
               max={100}
             />
 
+            <label style={labelStyle}>Fecha</label>
+            <input
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+              style={inputStyle}
+            />
+
+            <label style={labelStyle}>Archivo PDF</label>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handleArchivoChange}
+              style={{ marginBottom: 24 }}
+            />
+
             <button style={buttonStyle} onClick={handleAgregar}>
               Agregar
             </button>
           </div>
 
-          {/* Tabla con resultados */}
+          {/* Tabla */}
           <table style={tableStyle}>
             <thead>
               <tr>
                 <th style={thStyle}>Nombre</th>
                 <th style={thStyle}>Evaluación</th>
                 <th style={thStyle}>Puntaje</th>
+                <th style={thStyle}>Fecha</th>
+                <th style={thStyle}>Archivo</th>
               </tr>
             </thead>
             <tbody>
               {resultados.length === 0 ? (
                 <tr>
-                  <td colSpan={3} style={emptyRowStyle}>
+                  <td colSpan={5} style={emptyRowStyle}>
                     No hay resultados registrados.
                   </td>
                 </tr>
@@ -216,6 +270,10 @@ export default function Results() {
                     <td style={tdStyle}>{res.nombre}</td>
                     <td style={tdStyle}>{res.evaluacion}</td>
                     <td style={tdStyle}>{res.puntaje}</td>
+                    <td style={tdStyle}>{res.fecha}</td>
+                    <td style={tdStyle}>
+                      {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
+                    </td>
                   </tr>
                 ))
               )}
@@ -223,7 +281,7 @@ export default function Results() {
           </table>
         </div>
 
-        {/* Panel derecho: Imagen logo */}
+        {/* Panel derecho: Logo */}
         <div style={rightPanelStyle}>
           <img
             src="/logo.png"
