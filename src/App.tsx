@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Components/Login";
 import LoginGoogle from "./Components/LoginGoogle";
 import Dashboard from "./Components/Dashboard";
@@ -28,48 +28,48 @@ function App() {
     return "usuario";
   };
 
+  if (!userEmail) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login onLogin={setUserEmail} />} />
+        <Route
+          path="/login-google"
+          element={<LoginGoogle onLogin={setUserEmail} />}
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
+  const role = getUserRole(userEmail);
+
   return (
-    <HashRouter>
-      {!userEmail ? (
-        <Routes>
-          <Route path="/login" element={<Login onLogin={setUserEmail} />} />
-          <Route
-            path="/login-google"
-            element={<LoginGoogle onLogin={setUserEmail} />}
+    <Routes>
+      <Route
+        path="/dashboard"
+        element={
+          <Dashboard
+            role={role}
+            onLogout={() => setUserEmail("")}
+            userEmail={userEmail} // Aquí agregamos la prop requerida
+            // userPhotoUrl="url_de_foto_opcional" // Puedes agregar si tienes la URL
           />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      ) : (
-        <Routes>
-          <Route
-            path="/dashboard"
-            element={
-              <Dashboard
-                role={getUserRole(userEmail)}
-                onLogout={() => setUserEmail("")}
-                userEmail={userEmail} // Aquí agregamos la prop requerida
-                // userPhotoUrl="url_de_foto_opcional" // Puedes agregar si tienes la URL
-              />
-            }
-          />
-          <Route path="/usuarios" element={<Users />} />
-          <Route
-            path="/panel"
-            element={
-              <UserPanel email={userEmail} role={getUserRole(userEmail)} />
-            }
-          />
-          <Route path="/candidatos" element={<Candidates />} />
-          <Route path="/evaluaciones" element={<Evaluations />} />
-          <Route path="/reportes" element={<Reports />} />
-          <Route path="/resultados" element={<Results />} />
-          <Route path="/exportar" element={<ExportData />} />
-          <Route path="/estadisticas" element={<Statistics />} />
-          <Route path="/configuracion" element={<Config />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      )}
-    </HashRouter>
+        }
+      />
+      <Route path="/usuarios" element={<Users />} />
+      <Route
+        path="/panel"
+        element={<UserPanel email={userEmail} role={role} />}
+      />
+      <Route path="/candidatos" element={<Candidates />} />
+      <Route path="/evaluaciones" element={<Evaluations />} />
+      <Route path="/reportes" element={<Reports />} />
+      <Route path="/resultados" element={<Results />} />
+      <Route path="/exportar" element={<ExportData />} />
+      <Route path="/estadisticas" element={<Statistics />} />
+      <Route path="/configuracion" element={<Config />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }
 
