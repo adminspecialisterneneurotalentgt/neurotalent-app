@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Components/Login";
 import LoginGoogle from "./Components/LoginGoogle";
 import Dashboard from "./Components/Dashboard";
@@ -29,7 +29,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       {!userEmail ? (
         <Routes>
           <Route path="/login" element={<Login onLogin={setUserEmail} />} />
@@ -69,7 +69,7 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       )}
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
