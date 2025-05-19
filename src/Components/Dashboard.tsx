@@ -278,8 +278,8 @@ export default function Dashboard({
               opacity: 0.85,
             }}
           >
-            PUTAMADRE MIERDA DE PROGRAMACION a nuestro portal de gestiones. Aquí
-            podrás administrar candidatos, evaluaciones, reportes y mucho más.
+            Bienvenido a nuestro portal de gestiones. Aquí podrás administrar
+            candidatos, evaluaciones, reportes y mucho más.
           </p>
 
           <div
