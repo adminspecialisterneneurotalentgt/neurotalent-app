@@ -1,4 +1,5 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState } from "react";
+import type { ChangeEvent } from "react";
 
 const pageStyle: React.CSSProperties = {
   backgroundColor: "#262d7d",
