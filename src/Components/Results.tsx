@@ -1,74 +1,63 @@
 import React, { useState } from "react";
 import type { ChangeEvent } from "react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const pageStyle: React.CSSProperties = {
   backgroundColor: "#262d7d",
   minHeight: "100vh",
   padding: 40,
   color: "white",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
-
-const containerStyle: React.CSSProperties = {
-  backgroundColor: "white",
-  color: "#262d7d",
-  borderRadius: 16,
-  padding: "40px 50px",
-  maxWidth: 1000,
-  width: "100%",
-  border: "2px solid #262d7d",
-  display: "flex",
-  gap: 40,
+  maxWidth: "1200px",
+  margin: "0 auto",
   boxSizing: "border-box",
 };
 
-const leftPanelStyle: React.CSSProperties = {
-  flex: 1,
-};
-
-const rightPanelStyle: React.CSSProperties = {
-  width: 180,
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "flex-start",
+const backLinkStyle: React.CSSProperties = {
+  color: "white",
+  cursor: "pointer",
+  textDecoration: "underline",
+  marginBottom: 20,
+  display: "inline-block",
+  fontWeight: "bold",
 };
 
 const titleStyle: React.CSSProperties = {
   fontWeight: "bold",
-  fontSize: 26,
-  marginBottom: 32,
-  lineHeight: 1.2,
-};
-
-const backLinkStyle: React.CSSProperties = {
-  display: "inline-block",
-  marginBottom: 20,
-  color: "#262d7d",
-  cursor: "pointer",
-  textDecoration: "underline",
+  fontSize: 28,
+  marginBottom: 24,
+  color: "white",
 };
 
 const formStyle: React.CSSProperties = {
-  marginBottom: 50,
+  backgroundColor: "#fff",
+  padding: 30,
+  borderRadius: 12,
+  marginBottom: 40,
+  color: "#262d7d",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
 };
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  marginBottom: 6,
+  marginBottom: 8,
   fontWeight: "600",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "14px 16px",
-  borderRadius: 8,
+  borderRadius: 6,
   border: "1px solid #ccc",
   marginBottom: 24,
-  fontSize: 18,
+  fontSize: 16,
   boxSizing: "border-box",
-  lineHeight: 1.4,
+};
+
+const textareaStyle: React.CSSProperties = {
+  ...inputStyle,
+  resize: "vertical",
+  minHeight: "60px",
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -87,48 +76,57 @@ const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
   fontSize: 16,
+  backgroundColor: "white",
+  borderRadius: 12,
+  overflow: "hidden",
 };
 
 const thStyle: React.CSSProperties = {
+  backgroundColor: "#262d7d",
+  color: "white",
+  padding: "12px",
   textAlign: "left",
-  padding: "12px 15px",
-  backgroundColor: "#f1f1f1",
-  color: "#262d7d",
-  fontWeight: "bold",
   borderBottom: "2px solid #ccc",
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: "12px 15px",
+  padding: "12px",
   borderBottom: "1px solid #ddd",
-  color: "#444",
+  color: "#333",
+  verticalAlign: "top",
 };
 
-const emptyRowStyle: React.CSSProperties = {
-  textAlign: "center",
-  padding: 30,
-  color: "#888",
-  fontStyle: "italic",
+const actionButtonStyle: React.CSSProperties = {
+  marginRight: 10,
+  padding: "6px 12px",
+  borderRadius: 6,
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "bold",
 };
 
 interface Resultado {
+  id: number;
   nombre: string;
   evaluacion: string;
   puntaje: number;
   fecha: string;
   archivoPDF?: File;
+  comentarios: string;
 }
 
 export default function Results() {
-  // Estado para resultados
+  // Estados
   const [resultados, setResultados] = useState<Resultado[]>([]);
+  const [editId, setEditId] = useState<number | null>(null);
 
-  // Estados formulario
+  // Formulario
   const [nombre, setNombre] = useState("");
   const [evaluacion, setEvaluacion] = useState("");
   const [puntaje, setPuntaje] = useState("");
   const [fecha, setFecha] = useState("");
   const [archivoPDF, setArchivoPDF] = useState<File | null>(null);
+  const [comentarios, setComentarios] = useState("");
 
   // Manejar archivo PDF
   const handleArchivoChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -146,150 +144,257 @@ export default function Results() {
     setArchivoPDF(file);
   };
 
-  // Agregar resultado
+  // Validar y agregar o actualizar resultado
   const handleAgregar = () => {
     if (!nombre || !evaluacion || !puntaje || !fecha) {
-      alert("Por favor completa todos los campos.");
+      alert("Por favor completa todos los campos obligatorios.");
       return;
     }
     if (!archivoPDF) {
       alert("Por favor selecciona un archivo PDF.");
       return;
     }
-
     const puntajeNum = Number(puntaje);
     if (isNaN(puntajeNum) || puntajeNum < 0 || puntajeNum > 100) {
       alert("Puntaje debe ser un número entre 0 y 100.");
       return;
     }
 
-    // Agregar resultado nuevo (archivo se guarda solo en estado, backend se implementa aparte)
-    setResultados([
-      ...resultados,
-      { nombre, evaluacion, puntaje: puntajeNum, fecha, archivoPDF },
-    ]);
+    if (editId !== null) {
+      // Actualizar
+      setResultados((prev) =>
+        prev.map((r) =>
+          r.id === editId
+            ? {
+                id: editId,
+                nombre,
+                evaluacion,
+                puntaje: puntajeNum,
+                fecha,
+                archivoPDF,
+                comentarios,
+              }
+            : r
+        )
+      );
+      setEditId(null);
+    } else {
+      // Nuevo
+      const nuevo: Resultado = {
+        id: Date.now(),
+        nombre,
+        evaluacion,
+        puntaje: puntajeNum,
+        fecha,
+        archivoPDF,
+        comentarios,
+      };
+      setResultados([...resultados, nuevo]);
+    }
 
-    // Limpiar formulario
+    limpiarFormulario();
+  };
+
+  const limpiarFormulario = () => {
     setNombre("");
     setEvaluacion("");
     setPuntaje("");
     setFecha("");
     setArchivoPDF(null);
+    setComentarios("");
+    // Limpiar input file manualmente si quieres:
+    const inputFile = document.getElementById(
+      "archivoInput"
+    ) as HTMLInputElement | null;
+    if (inputFile) inputFile.value = "";
   };
 
-  // Regresar a dashboard
+  // Eliminar resultado
+  const handleEliminar = (id: number) => {
+    if (confirm("¿Estás seguro de eliminar este resultado?")) {
+      setResultados((prev) => prev.filter((r) => r.id !== id));
+      if (editId === id) limpiarFormulario();
+    }
+  };
+
+  // Editar resultado
+  const handleEditar = (id: number) => {
+    const res = resultados.find((r) => r.id === id);
+    if (!res) return;
+    setEditId(id);
+    setNombre(res.nombre);
+    setEvaluacion(res.evaluacion);
+    setPuntaje(res.puntaje.toString());
+    setFecha(res.fecha);
+    setArchivoPDF(res.archivoPDF || null);
+    setComentarios(res.comentarios);
+  };
+
+  // Exportar Excel
+  const exportarExcel = () => {
+    if (resultados.length === 0) {
+      alert("No hay resultados para exportar.");
+      return;
+    }
+    const datos = resultados.map(({ id, archivoPDF, ...rest }) => rest);
+    const ws = XLSX.utils.json_to_sheet(datos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Resultados");
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, "ResultadosEvaluaciones.xlsx");
+  };
+
+  // Regresar
   const handleRegresar = () => {
     window.history.back();
   };
 
   return (
     <div style={pageStyle}>
-      <div style={containerStyle}>
-        {/* Panel izquierdo: Formulario y tabla */}
-        <div style={leftPanelStyle}>
-          {/* Botón regresar */}
-          <a style={backLinkStyle} onClick={handleRegresar}>
-            ← Regresar a Dashboard
-          </a>
+      <a style={backLinkStyle} onClick={handleRegresar}>
+        ← Regresar a Dashboard
+      </a>
 
-          {/* Título */}
-          <h2 style={titleStyle}>Resultados de Evaluaciones</h2>
+      <h1 style={titleStyle}>Resultados de Evaluaciones</h1>
 
-          {/* Formulario */}
-          <div style={formStyle}>
-            <label style={labelStyle}>Nombre</label>
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              style={inputStyle}
-              placeholder="Nombre del candidato"
-            />
+      {/* Formulario */}
+      <div style={formStyle}>
+        <label style={labelStyle}>Nombre</label>
+        <input
+          type="text"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          style={inputStyle}
+          placeholder="Nombre del candidato"
+        />
 
-            <label style={labelStyle}>Evaluación</label>
-            <input
-              type="text"
-              value={evaluacion}
-              onChange={(e) => setEvaluacion(e.target.value)}
-              style={inputStyle}
-              placeholder="Nombre de la evaluación"
-            />
+        <label style={labelStyle}>Evaluación</label>
+        <input
+          type="text"
+          value={evaluacion}
+          onChange={(e) => setEvaluacion(e.target.value)}
+          style={inputStyle}
+          placeholder="Nombre de la evaluación"
+        />
 
-            <label style={labelStyle}>Puntaje</label>
-            <input
-              type="number"
-              value={puntaje}
-              onChange={(e) => setPuntaje(e.target.value)}
-              style={inputStyle}
-              placeholder="0 - 100"
-              min={0}
-              max={100}
-            />
+        <label style={labelStyle}>Puntaje</label>
+        <input
+          type="number"
+          value={puntaje}
+          onChange={(e) => setPuntaje(e.target.value)}
+          style={inputStyle}
+          placeholder="0 - 100"
+          min={0}
+          max={100}
+        />
 
-            <label style={labelStyle}>Fecha</label>
-            <input
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-              style={inputStyle}
-            />
+        <label style={labelStyle}>Fecha</label>
+        <input
+          type="date"
+          value={fecha}
+          onChange={(e) => setFecha(e.target.value)}
+          style={inputStyle}
+        />
 
-            <label style={labelStyle}>Archivo PDF</label>
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleArchivoChange}
-              style={{ marginBottom: 24 }}
-            />
+        <label style={labelStyle}>Archivo PDF</label>
+        <input
+          id="archivoInput"
+          type="file"
+          accept="application/pdf"
+          onChange={handleArchivoChange}
+          style={{ marginBottom: 24 }}
+        />
 
-            <button style={buttonStyle} onClick={handleAgregar}>
-              Agregar
-            </button>
-          </div>
+        <label style={labelStyle}>Comentarios adicionales</label>
+        <textarea
+          value={comentarios}
+          onChange={(e) => setComentarios(e.target.value)}
+          style={textareaStyle}
+          placeholder="Comentarios o notas adicionales"
+          rows={3}
+        />
 
-          {/* Tabla */}
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Nombre</th>
-                <th style={thStyle}>Evaluación</th>
-                <th style={thStyle}>Puntaje</th>
-                <th style={thStyle}>Fecha</th>
-                <th style={thStyle}>Archivo</th>
+        <button style={buttonStyle} onClick={handleAgregar}>
+          {editId !== null ? "Actualizar" : "Agregar"}
+        </button>
+      </div>
+
+      {/* Tabla de resultados */}
+      <table style={tableStyle}>
+        <thead>
+          <tr>
+            <th style={thStyle}>Nombre</th>
+            <th style={thStyle}>Evaluación</th>
+            <th style={thStyle}>Puntaje</th>
+            <th style={thStyle}>Fecha</th>
+            <th style={thStyle}>Archivo</th>
+            <th style={thStyle}>Comentarios</th>
+            <th style={thStyle}>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {resultados.length === 0 ? (
+            <tr>
+              <td
+                colSpan={7}
+                style={{
+                  ...tdStyle,
+                  textAlign: "center",
+                  fontStyle: "italic",
+                  color: "#888",
+                }}
+              >
+                No hay resultados registrados.
+              </td>
+            </tr>
+          ) : (
+            resultados.map((res) => (
+              <tr key={res.id}>
+                <td style={tdStyle}>{res.nombre}</td>
+                <td style={tdStyle}>{res.evaluacion}</td>
+                <td style={tdStyle}>{res.puntaje}</td>
+                <td style={tdStyle}>{res.fecha}</td>
+                <td style={tdStyle}>
+                  {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
+                </td>
+                <td style={tdStyle}>{res.comentarios}</td>
+                <td style={tdStyle}>
+                  <button
+                    style={{
+                      ...actionButtonStyle,
+                      backgroundColor: "#3498db",
+                      color: "white",
+                    }}
+                    onClick={() => handleEditar(res.id)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    style={{
+                      ...actionButtonStyle,
+                      backgroundColor: "#e74c3c",
+                      color: "white",
+                    }}
+                    onClick={() => handleEliminar(res.id)}
+                  >
+                    Eliminar
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {resultados.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={emptyRowStyle}>
-                    No hay resultados registrados.
-                  </td>
-                </tr>
-              ) : (
-                resultados.map((res, i) => (
-                  <tr key={i}>
-                    <td style={tdStyle}>{res.nombre}</td>
-                    <td style={tdStyle}>{res.evaluacion}</td>
-                    <td style={tdStyle}>{res.puntaje}</td>
-                    <td style={tdStyle}>{res.fecha}</td>
-                    <td style={tdStyle}>
-                      {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+            ))
+          )}
+        </tbody>
+      </table>
 
-        {/* Panel derecho: Logo */}
-        <div style={rightPanelStyle}>
-          <img
-            src="/logo.png"
-            alt="Logo Specialisterne"
-            style={{ maxWidth: "100%", height: "auto" }}
-          />
-        </div>
+      {/* Botón Exportar */}
+      <div style={{ marginTop: 30, textAlign: "center" }}>
+        <button
+          style={{ ...buttonStyle, maxWidth: 250 }}
+          onClick={exportarExcel}
+        >
+          Exportar a Excel
+        </button>
       </div>
     </div>
   );
