@@ -3,14 +3,34 @@ import type { ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+const logoStyle: React.CSSProperties = {
+  position: "fixed",
+  top: "50px",
+  right: "60px",
+  height: "150px",
+  objectFit: "contain",
+  zIndex: 10,
+};
+
+const actionButtonStyle: React.CSSProperties = {
+  marginRight: 10,
+  padding: "6px 12px",
+  borderRadius: 6,
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "bold",
+};
+
 const pageStyle: React.CSSProperties = {
   backgroundColor: "#262d7d",
   minHeight: "100vh",
-  padding: 40,
+  padding: "40px 60px",
   color: "white",
-  maxWidth: "1200px",
+  maxWidth: "1400px",
   margin: "0 auto",
   boxSizing: "border-box",
+  position: "relative",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
 };
 
 const backLinkStyle: React.CSSProperties = {
@@ -29,15 +49,6 @@ const titleStyle: React.CSSProperties = {
   color: "white",
 };
 
-const formStyle: React.CSSProperties = {
-  backgroundColor: "#fff",
-  padding: 30,
-  borderRadius: 12,
-  marginBottom: 40,
-  color: "#262d7d",
-  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-};
-
 const labelStyle: React.CSSProperties = {
   display: "block",
   marginBottom: 8,
@@ -46,18 +57,20 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "14px 16px",
+  padding: "12px 14px",
   borderRadius: 6,
   border: "1px solid #ccc",
-  marginBottom: 24,
+  marginBottom: 20,
   fontSize: 16,
   boxSizing: "border-box",
+  backgroundColor: "white",
+  color: "#333",
 };
 
 const textareaStyle: React.CSSProperties = {
   ...inputStyle,
   resize: "vertical",
-  minHeight: "60px",
+  minHeight: "70px",
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -70,6 +83,7 @@ const buttonStyle: React.CSSProperties = {
   cursor: "pointer",
   fontWeight: "bold",
   fontSize: 18,
+  marginTop: 10,
 };
 
 const tableStyle: React.CSSProperties = {
@@ -77,32 +91,23 @@ const tableStyle: React.CSSProperties = {
   borderCollapse: "collapse",
   fontSize: 16,
   backgroundColor: "white",
-  borderRadius: 12,
+  borderRadius: 8,
   overflow: "hidden",
 };
 
 const thStyle: React.CSSProperties = {
   backgroundColor: "#262d7d",
   color: "white",
-  padding: "12px",
+  padding: "12px 15px",
   textAlign: "left",
-  borderBottom: "2px solid #ccc",
+  borderBottom: "2px solid #1b2568",
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: "12px",
+  padding: "12px 15px",
   borderBottom: "1px solid #ddd",
   color: "#333",
   verticalAlign: "top",
-};
-
-const actionButtonStyle: React.CSSProperties = {
-  marginRight: 10,
-  padding: "6px 12px",
-  borderRadius: 6,
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "bold",
 };
 
 interface Resultado {
@@ -144,7 +149,7 @@ export default function Results() {
     setArchivoPDF(file);
   };
 
-  // Validar y agregar o actualizar resultado
+  // Agregar o actualizar resultado
   const handleAgregar = () => {
     if (!nombre || !evaluacion || !puntaje || !fecha) {
       alert("Por favor completa todos los campos obligatorios.");
@@ -161,7 +166,6 @@ export default function Results() {
     }
 
     if (editId !== null) {
-      // Actualizar
       setResultados((prev) =>
         prev.map((r) =>
           r.id === editId
@@ -179,7 +183,6 @@ export default function Results() {
       );
       setEditId(null);
     } else {
-      // Nuevo
       const nuevo: Resultado = {
         id: Date.now(),
         nombre,
@@ -202,7 +205,6 @@ export default function Results() {
     setFecha("");
     setArchivoPDF(null);
     setComentarios("");
-    // Limpiar input file manualmente si quieres:
     const inputFile = document.getElementById(
       "archivoInput"
     ) as HTMLInputElement | null;
@@ -252,14 +254,16 @@ export default function Results() {
 
   return (
     <div style={pageStyle}>
+      {/* Botón regresar */}
       <a style={backLinkStyle} onClick={handleRegresar}>
         ← Regresar a Dashboard
       </a>
 
+      {/* Título */}
       <h1 style={titleStyle}>Resultados de Evaluaciones</h1>
 
       {/* Formulario */}
-      <div style={formStyle}>
+      <div style={{ maxWidth: 600 }}>
         <label style={labelStyle}>Nombre</label>
         <input
           type="text"
@@ -320,7 +324,7 @@ export default function Results() {
         </button>
       </div>
 
-      {/* Tabla de resultados */}
+      {/* Tabla */}
       <table style={tableStyle}>
         <thead>
           <tr>
@@ -387,7 +391,7 @@ export default function Results() {
         </tbody>
       </table>
 
-      {/* Botón Exportar */}
+      {/* Botón exportar */}
       <div style={{ marginTop: 30, textAlign: "center" }}>
         <button
           style={{ ...buttonStyle, maxWidth: 250 }}
@@ -396,6 +400,9 @@ export default function Results() {
           Exportar a Excel
         </button>
       </div>
+
+      {/* Logo fijo */}
+      <img src="/logo.png" alt="Logo Specialisterne" style={logoStyle} />
     </div>
   );
 }
