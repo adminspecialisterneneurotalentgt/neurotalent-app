@@ -1,7 +1,17 @@
 import React, { useState, type ChangeEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+
+const pageStyle: React.CSSProperties = {
+  backgroundColor: "#fff",
+  minHeight: "100vh",
+  padding: "40px 60px",
+  color: "#262d7d",
+  maxWidth: "1400px",
+  margin: "0 auto",
+  boxSizing: "border-box",
+  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+};
 
 const containerStyle: React.CSSProperties = {
   backgroundColor: "white",
@@ -11,7 +21,8 @@ const containerStyle: React.CSSProperties = {
   border: "2px solid #262d7d",
   marginBottom: "30px",
   position: "relative",
-  maxWidth: 600,
+  maxWidth: 720,
+  width: "90%",
   marginLeft: "auto",
   marginRight: "auto",
 };
@@ -20,7 +31,6 @@ const labelStyle: React.CSSProperties = {
   fontWeight: "600",
   marginBottom: 6,
   display: "block",
-  color: "#262d7d",
 };
 
 const inputStyle: React.CSSProperties = {
@@ -32,7 +42,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 16,
   boxSizing: "border-box",
   color: "#333",
-  backgroundColor: "#ebecf0", // gris suave
+  backgroundColor: "#ebecf0", // gris suave aplicado a inputs
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -97,8 +107,6 @@ const logoStyle: React.CSSProperties = {
 };
 
 export default function Results() {
-  const navigate = useNavigate();
-
   const [resultados, setResultados] = useState<
     {
       id: number;
@@ -228,14 +236,16 @@ export default function Results() {
     saveAs(blob, "ResultadosEvaluaciones.xlsx");
   };
 
+  const handleRegresar = () => window.history.back();
+
   return (
-    <div style={{ ...containerStyle, marginTop: 60 }}>
-      {/* Botón regresar */}
+    <div style={pageStyle}>
+      {/* Regresar */}
       <div
         style={{ position: "fixed", top: "20px", left: "20px", zIndex: 1000 }}
       >
         <button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => window.history.back()}
           style={{
             background: "none",
             border: "none",
@@ -250,146 +260,155 @@ export default function Results() {
         </button>
       </div>
 
-      {/* Logo */}
-      <img src="/logo.png" alt="Logo Specialisterne" style={logoStyle} />
-
       {/* Título */}
-      <h2
-        style={{
-          textAlign: "center",
-          color: "#262d7d",
-          marginBottom: 20,
-          fontSize: "28px",
-        }}
-      >
+      <h1 style={{ ...labelStyle, fontSize: 28, fontWeight: "bold" }}>
         Resultados de Evaluaciones
-      </h2>
+      </h1>
 
-      {/* Formulario */}
-      <label style={labelStyle}>Nombre</label>
-      <input
-        type="text"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        style={inputStyle}
-        placeholder="Nombre del candidato"
-      />
+      {/* Contenedor formulario */}
+      <div style={containerStyle}>
+        {/* Logo */}
+        <div style={{ position: "relative" }}>
+          <img src="/logo.png" alt="Logo" style={logoStyle} />
+        </div>
 
-      <label style={labelStyle}>Evaluación</label>
-      <input
-        type="text"
-        value={evaluacion}
-        onChange={(e) => setEvaluacion(e.target.value)}
-        style={inputStyle}
-        placeholder="Nombre de la evaluación"
-      />
+        <label style={labelStyle}>Nombre</label>
+        <input
+          type="text"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          style={inputStyle}
+          placeholder="Nombre del candidato"
+        />
 
-      <label style={labelStyle}>Puntaje</label>
-      <input
-        type="number"
-        value={puntaje}
-        onChange={(e) => setPuntaje(e.target.value)}
-        style={inputStyle}
-        placeholder="0 - 100"
-        min={0}
-        max={100}
-      />
+        <label style={labelStyle}>Evaluación</label>
+        <input
+          type="text"
+          value={evaluacion}
+          onChange={(e) => setEvaluacion(e.target.value)}
+          style={inputStyle}
+          placeholder="Nombre de la evaluación"
+        />
 
-      <label style={labelStyle}>Fecha</label>
-      <input
-        type="date"
-        value={fecha}
-        onChange={(e) => setFecha(e.target.value)}
-        style={inputStyle}
-      />
+        <label style={labelStyle}>Puntaje</label>
+        <input
+          type="number"
+          value={puntaje}
+          onChange={(e) => setPuntaje(e.target.value)}
+          style={inputStyle}
+          placeholder="0 - 100"
+          min={0}
+          max={100}
+        />
 
-      <label style={labelStyle}>Archivo PDF</label>
-      <input
-        id="archivoInput"
-        type="file"
-        accept="application/pdf"
-        onChange={handleArchivoChange}
-        style={{ marginBottom: 20 }}
-      />
+        <label style={labelStyle}>Fecha</label>
+        <input
+          type="date"
+          value={fecha}
+          onChange={(e) => setFecha(e.target.value)}
+          style={inputStyle}
+        />
 
-      <label style={labelStyle}>Comentarios adicionales</label>
-      <textarea
-        value={comentarios}
-        onChange={(e) => setComentarios(e.target.value)}
-        style={textareaStyle}
-        placeholder="Comentarios o notas adicionales"
-      />
+        <label style={labelStyle}>Archivo PDF</label>
+        <input
+          id="archivoInput"
+          type="file"
+          accept="application/pdf"
+          onChange={handleArchivoChange}
+          style={{ marginBottom: 20 }}
+        />
 
-      <button style={buttonStyle} onClick={handleAgregar}>
-        {editId !== null ? "Actualizar" : "Agregar"}
-      </button>
+        <label style={labelStyle}>Comentarios adicionales</label>
+        <textarea
+          value={comentarios}
+          onChange={(e) => setComentarios(e.target.value)}
+          style={textareaStyle}
+          placeholder="Comentarios o notas adicionales"
+        />
 
-      {/* Tabla */}
-      <table style={{ ...tableStyle, marginTop: 40 }}>
-        <thead>
-          <tr>
-            <th style={thStyle}>Nombre</th>
-            <th style={thStyle}>Evaluación</th>
-            <th style={thStyle}>Puntaje</th>
-            <th style={thStyle}>Fecha</th>
-            <th style={thStyle}>Archivo</th>
-            <th style={thStyle}>Comentarios</th>
-            <th style={thStyle}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {resultados.length === 0 ? (
+        <button style={buttonStyle} onClick={handleAgregar}>
+          {editId !== null ? "Actualizar" : "Agregar"}
+        </button>
+      </div>
+
+      {/* Tabla resultados */}
+      <div style={containerStyle}>
+        <table style={tableStyle}>
+          <thead>
             <tr>
-              <td
-                colSpan={7}
-                style={{
-                  ...tdStyle,
-                  textAlign: "center",
-                  fontStyle: "italic",
-                  color: "#888",
-                }}
-              >
-                No hay resultados registrados.
-              </td>
+              <th style={thStyle}>Nombre</th>
+              <th style={thStyle}>Evaluación</th>
+              <th style={thStyle}>Puntaje</th>
+              <th style={thStyle}>Fecha</th>
+              <th style={thStyle}>Archivo</th>
+              <th style={thStyle}>Comentarios</th>
+              <th style={thStyle}>Acciones</th>
             </tr>
-          ) : (
-            resultados.map((res) => (
-              <tr key={res.id}>
-                <td style={tdStyle}>{res.nombre}</td>
-                <td style={tdStyle}>{res.evaluacion}</td>
-                <td style={tdStyle}>{res.puntaje}</td>
-                <td style={tdStyle}>{res.fecha}</td>
-                <td style={tdStyle}>
-                  {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
-                </td>
-                <td style={tdStyle}>{res.comentarios}</td>
-                <td style={tdStyle}>
-                  <button
-                    style={{
-                      ...actionButtonStyle,
-                      backgroundColor: "#3498db",
-                      color: "white",
-                    }}
-                    onClick={() => handleEditar(res.id)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    style={{
-                      ...actionButtonStyle,
-                      backgroundColor: "#e74c3c",
-                      color: "white",
-                    }}
-                    onClick={() => handleEliminar(res.id)}
-                  >
-                    Eliminar
-                  </button>
+          </thead>
+          <tbody>
+            {resultados.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  style={{
+                    ...tdStyle,
+                    textAlign: "center",
+                    fontStyle: "italic",
+                    color: "#888",
+                  }}
+                >
+                  No hay resultados registrados.
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              resultados.map((res) => (
+                <tr key={res.id}>
+                  <td style={tdStyle}>{res.nombre}</td>
+                  <td style={tdStyle}>{res.evaluacion}</td>
+                  <td style={tdStyle}>{res.puntaje}</td>
+                  <td style={tdStyle}>{res.fecha}</td>
+                  <td style={tdStyle}>
+                    {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
+                  </td>
+                  <td style={tdStyle}>{res.comentarios}</td>
+                  <td style={tdStyle}>
+                    <button
+                      style={{
+                        ...actionButtonStyle,
+                        backgroundColor: "#3498db",
+                        color: "white",
+                      }}
+                      onClick={() => handleEditar(res.id)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      style={{
+                        ...actionButtonStyle,
+                        backgroundColor: "#e74c3c",
+                        color: "white",
+                      }}
+                      onClick={() => handleEliminar(res.id)}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        {/* Botón exportar */}
+        <div style={{ marginTop: 20, textAlign: "center" }}>
+          <button
+            style={{ ...buttonStyle, maxWidth: 250 }}
+            onClick={exportarExcel}
+          >
+            Exportar a Excel
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
