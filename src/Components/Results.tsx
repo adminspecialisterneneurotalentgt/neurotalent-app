@@ -315,7 +315,14 @@ export default function Results() {
 
       {/* Tabla resultados */}
       <div style={containerStyle}>
-        <table style={tableStyle}>
+        <table
+          style={{
+            ...tableStyle,
+            minWidth: "900px", // ancho mínimo para que no se comprima
+            maxWidth: "100%", // para que no se salga del contenedor
+            margin: "0 auto", // para centrar horizontalmente
+          }}
+        >
           <thead>
             <tr>
               <th style={thStyle}>Nombre</th>
