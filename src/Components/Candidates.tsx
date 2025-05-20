@@ -54,7 +54,10 @@ export default function Candidates() {
   useEffect(() => {
     fetchCandidates();
   }, []);
-
+  const formatDateISO = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toISOString().slice(0, 10); // yyyy-MM-dd
+  };
   const handleAddOrUpdate = async () => {
     if (!firstName || !lastName || !email)
       return alert("Completa todos los campos");
@@ -67,7 +70,8 @@ export default function Candidates() {
     formData.append("lastName", lastName);
     formData.append("email", email);
     formData.append("telefono", telefono);
-    formData.append("fechaNacimiento", fechaNacimiento);
+    const fechaISO = formatDateISO(fechaNacimiento);
+    formData.append("fechaNacimiento", fechaISO);
     formData.append("direccion", direccion);
     formData.append("interes", interes);
     formData.append("disponible", disponible.toString());
