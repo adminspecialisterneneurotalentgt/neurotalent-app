@@ -39,7 +39,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 16,
   boxSizing: "border-box",
   color: "#333",
-  backgroundColor: "#ebecf0", // gris suave aplicado a inputs
+  backgroundColor: "#ebecf0",
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -256,9 +256,16 @@ export default function Results() {
       </div>
 
       {/* Título */}
-      <h1 style={{ ...labelStyle, fontSize: 28, fontWeight: "bold" }}>
+      <h2
+        style={{
+          textAlign: "center",
+          color: "#262d7d",
+          marginTop: "60px",
+          fontSize: "28px",
+        }}
+      >
         Resultados de Evaluaciones
-      </h1>
+      </h2>
 
       {/* Contenedor formulario */}
       <div style={containerStyle}>
