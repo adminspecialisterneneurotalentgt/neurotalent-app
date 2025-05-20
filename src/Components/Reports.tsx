@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { useNavigate } from "react-router-dom";
 
 interface Report {
   id: number;
   candidato: string;
   evaluacion: string;
-  fecha: string; // formato: yyyy-mm-dd o similar
+  fecha: string;
   puntaje: number;
+  archivoUrl?: string | null;
 }
 
 const thStyle: React.CSSProperties = {
-  backgroundColor: "#262d7d", // Color azul oscuro igual que encabezados de otros módulos
+  backgroundColor: "#262d7d",
   color: "white",
   padding: "12px 15px",
   textAlign: "left",
@@ -57,6 +57,7 @@ const containerStyle: React.CSSProperties = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
   display: "flex",
   flexDirection: "column",
+  position: "relative",
 };
 
 const pageStyle: React.CSSProperties = {
@@ -68,34 +69,35 @@ const pageStyle: React.CSSProperties = {
   position: "relative",
 };
 
+const logoStyle: React.CSSProperties = {
+  position: "absolute",
+  top: 30,
+  right: 30,
+  height: 140,
+  objectFit: "contain",
+};
+
 export default function Reports() {
   const [reports, setReports] = useState<Report[]>([]);
   const [filteredReports, setFilteredReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filtros
   const [filterCandidato, setFilterCandidato] = useState("");
   const [filterEvaluacion, setFilterEvaluacion] = useState("");
   const [filterFecha, setFilterFecha] = useState("");
 
-  // Ordenamiento
   const [sortField, setSortField] = useState<keyof Report | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
 
-  // Paginacion
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
 
-  const navigate = useNavigate();
-
-  // Simulación de carga de datos
   const fetchReports = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Aquí cambiar por endpoint real
       const response = await fetch("/api/reports");
       if (!response.ok) throw new Error("Error al cargar los reportes");
       const data: Report[] = await response.json();
@@ -111,7 +113,6 @@ export default function Reports() {
     fetchReports();
   }, []);
 
-  // Filtrar y ordenar
   useEffect(() => {
     let data = [...reports];
     if (filterCandidato)
@@ -131,6 +132,8 @@ export default function Reports() {
       data.sort((a, b) => {
         let valA = a[sortField];
         let valB = b[sortField];
+        if (valA == null) valA = ""; // evitar undefined/null
+        if (valB == null) valB = "";
         if (typeof valA === "string" && typeof valB === "string") {
           valA = valA.toLowerCase();
           valB = valB.toLowerCase();
@@ -151,13 +154,11 @@ export default function Reports() {
     sortAsc,
   ]);
 
-  // Paginación actual
   const paginatedReports = filteredReports.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
 
-  // Manejar click en header para ordenar
   const handleSort = (field: keyof Report) => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
@@ -167,7 +168,6 @@ export default function Reports() {
     }
   };
 
-  // Exportar a Excel
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
     const wsData = filteredReports.map((r) => ({
@@ -185,24 +185,6 @@ export default function Reports() {
 
   return (
     <div style={pageStyle}>
-      {/* Botón regresar fijo arriba */}
-      <div style={{ position: "fixed", top: 20, left: 20, zIndex: 1000 }}>
-        <button
-          onClick={() => navigate("/dashboard")}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#fff",
-            fontWeight: "bold",
-            fontSize: 16,
-            cursor: "pointer",
-            textDecoration: "underline",
-          }}
-        >
-          ← Regresar a Dashboard
-        </button>
-      </div>
-
       <div style={containerStyle}>
         <h2
           style={{
@@ -215,6 +197,9 @@ export default function Reports() {
         >
           Reporte General de Evaluaciones
         </h2>
+
+        {/* Logo */}
+        <img src="/logo.png" alt="Logo" style={logoStyle} />
 
         {/* Filtros */}
         <div
@@ -283,19 +268,20 @@ export default function Reports() {
                 <th style={thStyle} onClick={() => handleSort("puntaje")}>
                   Puntaje {sortField === "puntaje" ? (sortAsc ? "▲" : "▼") : ""}
                 </th>
+                <th style={thStyle}>Archivo</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: "center", padding: 20 }}>
+                  <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
                     Cargando reportes...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     style={{ textAlign: "center", padding: 20, color: "red" }}
                   >
                     {error}
@@ -304,7 +290,7 @@ export default function Reports() {
               ) : paginatedReports.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     style={{ textAlign: "center", padding: 20, color: "#888" }}
                   >
                     No hay reportes que coincidan.
@@ -329,6 +315,19 @@ export default function Reports() {
                     <td style={tdStyle}>{r.evaluacion}</td>
                     <td style={tdStyle}>{r.fecha}</td>
                     <td style={tdStyle}>{r.puntaje}</td>
+                    <td style={tdStyle}>
+                      {r.archivoUrl ? (
+                        <a
+                          href={r.archivoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Ver archivo
+                        </a>
+                      ) : (
+                        "Sin archivo"
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -364,30 +363,14 @@ export default function Reports() {
           </button>
         </div>
 
-        {/* Botones acción */}
-        <div
-          style={{
-            marginTop: 25,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
+        {/* Botón exportar */}
+        <div style={{ marginTop: 25, textAlign: "center" }}>
           <button
             style={buttonStyle}
-            onClick={() => exportToExcel()}
+            onClick={exportToExcel}
             title="Exportar reportes a Excel"
           >
             Exportar a Excel
-          </button>
-
-          <button
-            style={buttonStyle}
-            onClick={() => navigate("/dashboard")}
-            title="Volver al dashboard"
-          >
-            Volver al Dashboard
           </button>
         </div>
       </div>
