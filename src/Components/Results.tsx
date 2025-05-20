@@ -94,15 +94,6 @@ const actionButtonStyle: React.CSSProperties = {
   fontWeight: "bold",
 };
 
-const logoStyle: React.CSSProperties = {
-  position: "absolute",
-  top: 10,
-  right: 20,
-  height: 150,
-  objectFit: "contain",
-  zIndex: 10,
-};
-
 export default function Results() {
   const [resultados, setResultados] = useState<
     {
@@ -267,13 +258,23 @@ export default function Results() {
         Resultados de Evaluaciones
       </h2>
 
+      {/* Logo */}
+      <div style={{ position: "relative" }}>
+        <img
+          src="/logo.png"
+          alt="Logo"
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "-450px",
+            height: "350px",
+            objectFit: "contain",
+          }}
+        />
+      </div>
+
       {/* Contenedor formulario */}
       <div style={containerStyle}>
-        {/* Logo */}
-        <div style={{ position: "relative" }}>
-          <img src="/logo.png" alt="Logo" style={logoStyle} />
-        </div>
-
         <label style={labelStyle}>Nombre</label>
         <input
           type="text"
