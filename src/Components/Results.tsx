@@ -7,7 +7,8 @@ const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   padding: "40px 60px",
   color: "#262d7d",
-  maxWidth: "1400px",
+  maxWidth: 720,
+  width: "90%",
   margin: "0 auto",
   boxSizing: "border-box",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -21,10 +22,6 @@ const containerStyle: React.CSSProperties = {
   border: "2px solid #262d7d",
   marginBottom: "30px",
   position: "relative",
-  maxWidth: 720,
-  width: "90%",
-  marginLeft: "auto",
-  marginRight: "auto",
 };
 
 const labelStyle: React.CSSProperties = {
@@ -235,8 +232,6 @@ export default function Results() {
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(blob, "ResultadosEvaluaciones.xlsx");
   };
-
-  const handleRegresar = () => window.history.back();
 
   return (
     <div style={pageStyle}>
