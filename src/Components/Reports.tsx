@@ -186,10 +186,10 @@ export default function Reports() {
         src="/logo.png"
         alt="Logo"
         style={{
-          position: "absolute",
-          top: "10px",
-          right: "-450px",
-          height: "350px",
+          position: "fixed",
+          top: 40,
+          right: 40,
+          height: 3500, // más grande
           objectFit: "contain",
           zIndex: 900,
         }}
