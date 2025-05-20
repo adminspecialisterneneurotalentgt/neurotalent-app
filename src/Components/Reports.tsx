@@ -179,19 +179,25 @@ export default function Reports() {
           position: "relative",
         }}
       >
-        {/* Logo */}
-        <img
-          src="/logo.png"
-          alt="Logo"
-          style={{
-            position: "absolute",
-            top: 20,
-            right: 20,
-            height: 100,
-            objectFit: "contain",
-          }}
-        />
-
+        {/* Regresar */}
+        <div
+          style={{ position: "fixed", top: "20px", left: "20px", zIndex: 1000 }}
+        >
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#262d7d",
+              fontWeight: "bold",
+              fontSize: "16px",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
+          >
+            ← Regresar a Dashboard
+          </button>
+        </div>
         <h2
           style={{
             color: "#262d7d",
@@ -204,6 +210,20 @@ export default function Reports() {
           Reporte General de Evaluaciones
         </h2>
 
+        {/* Logo */}
+        <div style={{ position: "relative" }}>
+          <img
+            src="/logo.png"
+            alt="Logo"
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "-450px",
+              height: "350px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
         {/* Filtros con etiquetas */}
         <div
           style={{
