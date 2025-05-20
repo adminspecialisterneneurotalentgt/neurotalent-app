@@ -3,14 +3,15 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 const pageStyle: React.CSSProperties = {
-  backgroundColor: "#fff",
+  backgroundColor: "#f0f0f0", // gris claro
   minHeight: "100vh",
-  padding: "40px 60px",
+  padding: "40px 20px",
   color: "#262d7d",
-  maxWidth: "1400px",
+  maxWidth: "1000px", // ancho máximo solicitado
   margin: "0 auto",
   boxSizing: "border-box",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  position: "relative",
 };
 
 const containerStyle: React.CSSProperties = {
@@ -95,7 +96,7 @@ const logoStyle: React.CSSProperties = {
   position: "fixed",
   top: 50,
   right: 60,
-  height: 150,
+  height: 350, // mismo tamaño que evaluaciones
   objectFit: "contain",
   zIndex: 10,
 };
@@ -235,15 +236,34 @@ export default function Results() {
   return (
     <div style={pageStyle}>
       {/* Botón regresar */}
-      <a
-        style={{ ...labelStyle, cursor: "pointer", marginBottom: 20 }}
+      <button
         onClick={handleRegresar}
+        style={{
+          position: "fixed",
+          top: 20,
+          left: 20,
+          zIndex: 1000,
+          background: "none",
+          border: "none",
+          color: "#262d7d",
+          fontWeight: "bold",
+          fontSize: 16,
+          cursor: "pointer",
+          textDecoration: "underline",
+        }}
       >
         ← Regresar a Dashboard
-      </a>
+      </button>
 
       {/* Título */}
-      <h1 style={{ ...labelStyle, fontSize: 28, fontWeight: "bold" }}>
+      <h1
+        style={{
+          ...labelStyle,
+          fontSize: 28,
+          fontWeight: "bold",
+          marginTop: 60,
+        }}
+      >
         Resultados de Evaluaciones
       </h1>
 
