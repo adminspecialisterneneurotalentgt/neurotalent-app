@@ -15,31 +15,31 @@ const pageStyle: React.CSSProperties = {
 };
 
 const containerStyle: React.CSSProperties = {
-  backgroundColor: "white",
-  padding: "30px 40px",
-  borderRadius: 16,
-  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-  border: "2px solid #262d7d",
-  marginBottom: "30px",
+  backgroundColor: "#f9f9f9", // gris muy suave como en evaluations
+  padding: 20,
+  borderRadius: 10,
+  marginBottom: 30,
+  boxShadow: "0 4px 10px rgba(0,0,0,0.1)", // sombra suave
   position: "relative",
 };
 
 const labelStyle: React.CSSProperties = {
-  fontWeight: "600",
+  fontWeight: "bold",
   marginBottom: 6,
   display: "block",
+  color: "#262d7d",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "12px 14px",
+  padding: "10px",
   borderRadius: 6,
   border: "1px solid #ccc",
-  marginBottom: 20,
+  marginBottom: 15,
   fontSize: 16,
   boxSizing: "border-box",
   color: "#333",
-  backgroundColor: "#ebecf0",
+  backgroundColor: "white", // blanco para inputs
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -54,7 +54,7 @@ const buttonStyle: React.CSSProperties = {
   padding: "14px 0",
   width: "100%",
   border: "none",
-  borderRadius: 8,
+  borderRadius: 6,
   cursor: "pointer",
   fontWeight: "bold",
   fontSize: 18,
