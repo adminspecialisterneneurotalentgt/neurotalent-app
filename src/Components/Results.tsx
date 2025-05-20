@@ -252,6 +252,20 @@ export default function Results() {
         Resultados de Evaluaciones
       </h2>
 
+      <div style={{ position: "relative" }}>
+        <img
+          src="/logo.png"
+          alt="Logo"
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "-600px", // Más a la derecha
+            height: "350px", // Más grande
+            objectFit: "contain",
+          }}
+        />
+      </div>
+
       {/* Contenedor formulario */}
       <div style={containerStyle}>
         <label style={labelStyle}>Nombre</label>
