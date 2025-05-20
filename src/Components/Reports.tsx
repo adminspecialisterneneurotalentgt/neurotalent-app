@@ -3,45 +3,68 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useNavigate } from "react-router-dom";
 
+// Aquí ajusta la ruta del logo según tu proyecto
+import logoSpecialisterne from "../assets/logoSpecialisterne.png";
+
 interface Report {
   id: number;
   candidato: string;
   evaluacion: string;
-  fecha: string; // formato: yyyy-mm-dd o similar
+  fecha: string;
   puntaje: number;
+  archivoUrl?: string;
 }
 
 const thStyle: React.CSSProperties = {
-  backgroundColor: "#f1f1f1",
+  backgroundColor: "#2c2f69",
+  color: "white",
   padding: "10px",
   textAlign: "left",
-  borderBottom: "2px solid #ccc",
-  cursor: "pointer",
+  borderBottom: "none",
+  fontWeight: "bold",
+  fontSize: 14,
   userSelect: "none",
 };
 
 const tdStyle: React.CSSProperties = {
   padding: "10px",
-  borderBottom: "1px solid #ddd",
-};
-
-const buttonStyle: React.CSSProperties = {
-  backgroundColor: "#262d7d",
-  color: "white",
-  border: "none",
-  borderRadius: 6,
-  padding: "10px 20px",
-  margin: "0 10px",
-  cursor: "pointer",
-  fontWeight: "bold",
+  borderBottom: "1px solid #e2e2e2",
+  fontSize: 14,
+  color: "#444",
 };
 
 const inputStyle: React.CSSProperties = {
   padding: "8px 12px",
   borderRadius: 6,
-  border: "1px solid #ccc",
+  border: "1px solid #ddd",
   marginRight: 10,
+  marginBottom: 10,
   minWidth: 150,
+  fontSize: 14,
+  color: "#333",
+};
+
+const buttonPrimaryStyle: React.CSSProperties = {
+  backgroundColor: "#2c2f69",
+  color: "white",
+  border: "none",
+  borderRadius: 6,
+  padding: "12px 25px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  fontSize: 14,
+  marginRight: 10,
+  marginTop: 10,
+};
+
+const containerStyle: React.CSSProperties = {
+  backgroundColor: "white",
+  borderRadius: 12,
+  padding: 30,
+  maxWidth: 900,
+  margin: "40px auto",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  boxSizing: "border-box",
 };
 
 export default function Reports() {
@@ -50,28 +73,25 @@ export default function Reports() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filtros
   const [filterCandidato, setFilterCandidato] = useState("");
   const [filterEvaluacion, setFilterEvaluacion] = useState("");
   const [filterFecha, setFilterFecha] = useState("");
+  const [filterPuntajeMin, setFilterPuntajeMin] = useState("");
+  const [filterPuntajeMax, setFilterPuntajeMax] = useState("");
 
-  // Ordenamiento
   const [sortField, setSortField] = useState<keyof Report | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
 
-  // Paginacion
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
 
   const navigate = useNavigate();
 
-  // Función para cargar datos (simulada aquí, cambia URL por backend real)
   const fetchReports = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Ejemplo: cambiar URL a tu endpoint real
       const response = await fetch("/api/reports");
       if (!response.ok) throw new Error("Error al cargar los reportes");
       const data: Report[] = await response.json();
@@ -87,11 +107,9 @@ export default function Reports() {
     fetchReports();
   }, []);
 
-  // Filtrar y ordenar cuando cambien datos o filtros
   useEffect(() => {
     let data = [...reports];
 
-    // Filtrar
     if (filterCandidato)
       data = data.filter((r) =>
         r.candidato.toLowerCase().includes(filterCandidato.toLowerCase())
@@ -100,16 +118,22 @@ export default function Reports() {
       data = data.filter((r) =>
         r.evaluacion.toLowerCase().includes(filterEvaluacion.toLowerCase())
       );
-    if (filterFecha)
-      data = data.filter((r) =>
-        r.fecha.toLowerCase().includes(filterFecha.toLowerCase())
-      );
+    if (filterFecha) data = data.filter((r) => r.fecha === filterFecha);
+    if (filterPuntajeMin) {
+      const min = Number(filterPuntajeMin);
+      if (!isNaN(min)) data = data.filter((r) => r.puntaje >= min);
+    }
+    if (filterPuntajeMax) {
+      const max = Number(filterPuntajeMax);
+      if (!isNaN(max)) data = data.filter((r) => r.puntaje <= max);
+    }
 
-    // Ordenar
     if (sortField) {
       data.sort((a, b) => {
         let valA = a[sortField];
         let valB = b[sortField];
+        if (valA === undefined || valA === null) return 1;
+        if (valB === undefined || valB === null) return -1;
         if (typeof valA === "string" && typeof valB === "string") {
           valA = valA.toLowerCase();
           valB = valB.toLowerCase();
@@ -121,23 +145,23 @@ export default function Reports() {
     }
 
     setFilteredReports(data);
-    setPage(1); // reset pagina al cambiar filtro/orden
+    setPage(1);
   }, [
     reports,
     filterCandidato,
     filterEvaluacion,
     filterFecha,
+    filterPuntajeMin,
+    filterPuntajeMax,
     sortField,
     sortAsc,
   ]);
 
-  // Paginacion actual
   const paginatedReports = filteredReports.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
 
-  // Manejar click en header para ordenar
   const handleSort = (field: keyof Report) => {
     if (sortField === field) {
       setSortAsc(!sortAsc);
@@ -147,7 +171,6 @@ export default function Reports() {
     }
   };
 
-  // Exportar a Excel
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
     const wsData = filteredReports.map((r) => ({
@@ -155,6 +178,7 @@ export default function Reports() {
       Evaluacion: r.evaluacion,
       Fecha: r.fecha,
       Puntaje: r.puntaje,
+      Archivo: r.archivoUrl ? r.archivoUrl : "N/A",
     }));
     const ws = XLSX.utils.json_to_sheet(wsData);
     XLSX.utils.book_append_sheet(wb, ws, "Reportes");
@@ -165,40 +189,54 @@ export default function Reports() {
 
   return (
     <div
-      style={{
-        backgroundColor: "#262d7d",
-        minHeight: "100vh",
-        padding: "40px",
-        color: "black",
-        boxSizing: "border-box",
-      }}
+      style={{ backgroundColor: "#2c2f69", minHeight: "100vh", padding: 20 }}
     >
-      <div
-        style={{
-          backgroundColor: "white",
-          borderRadius: 16,
-          padding: 30,
-          maxWidth: 1000,
-          margin: "auto",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <h2
+      <div style={containerStyle}>
+        {/* Boton volver y logo */}
+        <div
           style={{
-            color: "#262d7d",
-            textAlign: "center",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: 20,
-            fontWeight: "bold",
-            fontSize: 24,
           }}
         >
+          <button
+            onClick={() => navigate("/dashboard")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#2c2f69",
+              fontWeight: "bold",
+              cursor: "pointer",
+              fontSize: 14,
+              padding: 0,
+              textDecoration: "underline",
+            }}
+          >
+            ← Regresar a Dashboard
+          </button>
+
+          <img
+            src={logoSpecialisterne}
+            alt="Logo Specialisterne"
+            style={{ height: 60, objectFit: "contain" }}
+          />
+        </div>
+
+        <h2 style={{ color: "#2c2f69", textAlign: "center", marginBottom: 20 }}>
           Reporte General de Evaluaciones
         </h2>
 
-        {/* Filtros */}
-        <div style={{ marginBottom: 20, display: "flex", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 10,
+            justifyContent: "center",
+            marginBottom: 20,
+          }}
+        >
           <input
             style={inputStyle}
             type="text"
@@ -216,15 +254,32 @@ export default function Reports() {
             autoComplete="off"
           />
           <input
-            style={inputStyle}
-            type="text"
-            placeholder="Filtrar por fecha (ej: 2023-05-01)"
+            style={{ ...inputStyle, minWidth: 130 }}
+            type="date"
+            placeholder="Filtrar por fecha"
             value={filterFecha}
             onChange={(e) => setFilterFecha(e.target.value)}
-            autoComplete="off"
+          />
+          <input
+            style={{ ...inputStyle, maxWidth: 100 }}
+            type="number"
+            placeholder="Puntaje mínimo"
+            min={0}
+            max={100}
+            value={filterPuntajeMin}
+            onChange={(e) => setFilterPuntajeMin(e.target.value)}
+          />
+          <input
+            style={{ ...inputStyle, maxWidth: 100 }}
+            type="number"
+            placeholder="Puntaje máximo"
+            min={0}
+            max={100}
+            value={filterPuntajeMax}
+            onChange={(e) => setFilterPuntajeMax(e.target.value)}
           />
           <button
-            style={{ ...buttonStyle, marginLeft: "auto" }}
+            style={{ ...buttonPrimaryStyle, marginLeft: "auto" }}
             onClick={() => fetchReports()}
             title="Refrescar reportes"
           >
@@ -232,14 +287,9 @@ export default function Reports() {
           </button>
         </div>
 
-        {/* Tabla con scroll horizontal */}
         <div style={{ overflowX: "auto" }}>
           <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              minWidth: 600,
-            }}
+            style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}
           >
             <thead>
               <tr>
@@ -257,19 +307,20 @@ export default function Reports() {
                 <th style={thStyle} onClick={() => handleSort("puntaje")}>
                   Puntaje {sortField === "puntaje" ? (sortAsc ? "▲" : "▼") : ""}
                 </th>
+                <th style={thStyle}>Archivo</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: "center", padding: 20 }}>
+                  <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
                     Cargando reportes...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     style={{ textAlign: "center", padding: 20, color: "red" }}
                   >
                     {error}
@@ -278,7 +329,7 @@ export default function Reports() {
               ) : paginatedReports.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     style={{ textAlign: "center", padding: 20, color: "#888" }}
                   >
                     No hay reportes que coincidan.
@@ -293,7 +344,7 @@ export default function Reports() {
                       transition: "background-color 0.3s",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#e6f0ff")
+                      (e.currentTarget.style.backgroundColor = "#f1f3ff")
                     }
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.backgroundColor = "transparent")
@@ -303,6 +354,20 @@ export default function Reports() {
                     <td style={tdStyle}>{r.evaluacion}</td>
                     <td style={tdStyle}>{r.fecha}</td>
                     <td style={tdStyle}>{r.puntaje}</td>
+                    <td style={tdStyle}>
+                      {r.archivoUrl ? (
+                        <a
+                          href={r.archivoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#2c2f69", fontWeight: "bold" }}
+                        >
+                          Ver archivo
+                        </a>
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -317,20 +382,29 @@ export default function Reports() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
+            gap: 15,
           }}
         >
           <button
-            style={{ ...buttonStyle, opacity: page === 1 ? 0.5 : 1 }}
+            style={{
+              ...buttonPrimaryStyle,
+              backgroundColor: page === 1 ? "#a3a5c3" : "#2c2f69",
+              cursor: page === 1 ? "not-allowed" : "pointer",
+            }}
             disabled={page === 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             Anterior
           </button>
-          <span style={{ margin: "0 15px", fontWeight: "bold" }}>
+          <span style={{ fontWeight: "bold" }}>
             Página {page} de {totalPages || 1}
           </span>
           <button
-            style={{ ...buttonStyle, opacity: page === totalPages ? 0.5 : 1 }}
+            style={{
+              ...buttonPrimaryStyle,
+              backgroundColor: page === totalPages ? "#a3a5c3" : "#2c2f69",
+              cursor: page === totalPages ? "not-allowed" : "pointer",
+            }}
             disabled={page === totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           >
@@ -338,30 +412,20 @@ export default function Reports() {
           </button>
         </div>
 
-        {/* Botones acción */}
+        {/* Botón exportar abajo */}
         <div
           style={{
-            marginTop: 25,
+            marginTop: 30,
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
+            justifyContent: "flex-end",
           }}
         >
           <button
-            style={buttonStyle}
-            onClick={() => exportToExcel()}
+            style={buttonPrimaryStyle}
+            onClick={exportToExcel}
             title="Exportar reportes a Excel"
           >
             Exportar a Excel
-          </button>
-
-          <button
-            style={buttonStyle}
-            onClick={() => navigate("/dashboard")}
-            title="Volver al dashboard"
-          >
-            Volver al Dashboard
           </button>
         </div>
       </div>
