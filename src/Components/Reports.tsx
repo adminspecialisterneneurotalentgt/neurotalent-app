@@ -56,16 +56,13 @@ export default function Reports() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // filtros
   const [filterCandidato, setFilterCandidato] = useState("");
   const [filterEvaluacion, setFilterEvaluacion] = useState("");
   const [filterFecha, setFilterFecha] = useState("");
 
-  // orden
   const [sortField, setSortField] = useState<keyof Report | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
 
-  // paginación
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
@@ -158,297 +155,329 @@ export default function Reports() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#f9f9f9",
-        minHeight: "100vh",
-        padding: "40px 20px",
-        boxSizing: "border-box",
-      }}
-    >
+    <>
+      {/* Botón fijo regresar */}
       <div
         style={{
-          backgroundColor: "white",
-          borderRadius: 16,
-          padding: 30,
-          maxWidth: 1000,
-          margin: "auto",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
+          position: "fixed",
+          top: 20,
+          left: 20,
+          zIndex: 1000,
         }}
       >
-        {/* Regresar */}
-        <div
-          style={{ position: "fixed", top: "20px", left: "20px", zIndex: 1000 }}
-        >
-          <button
-            onClick={() => window.history.back()}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#262d7d",
-              fontWeight: "bold",
-              fontSize: "16px",
-              cursor: "pointer",
-              textDecoration: "underline",
-            }}
-          >
-            ← Regresar a Dashboard
-          </button>
-        </div>
-        <h2
+        <button
+          onClick={() => window.history.back()}
           style={{
+            background: "none",
+            border: "none",
             color: "#262d7d",
-            textAlign: "center",
-            marginBottom: 30,
             fontWeight: "bold",
-            fontSize: 24,
+            fontSize: 16,
+            cursor: "pointer",
+            textDecoration: "underline",
           }}
         >
-          Reporte General de Evaluaciones
-        </h2>
+          ← Regresar a Dashboard
+        </button>
+      </div>
 
-        {/* Logo */}
-        <div style={{ position: "relative" }}>
+      <div
+        style={{
+          backgroundColor: "#f9f9f9",
+          minHeight: "100vh",
+          padding: "40px 20px",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "white",
+            borderRadius: 16,
+            padding: 30,
+            maxWidth: 1000,
+            margin: "auto",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+          }}
+        >
+          {/* Logo a la derecha */}
           <img
             src="/logo.png"
             alt="Logo"
             style={{
               position: "absolute",
-              top: "10px",
-              right: "-450px",
-              height: "350px",
+              top: 20,
+              right: 20,
+              height: 100,
               objectFit: "contain",
             }}
           />
-        </div>
-        {/* Filtros con etiquetas */}
-        <div
-          style={{
-            marginBottom: 20,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 20,
-          }}
-        >
+
+          {/* Titulo */}
+          <h2
+            style={{
+              color: "#262d7d",
+              textAlign: "center",
+              marginBottom: 30,
+              fontWeight: "bold",
+              fontSize: 24,
+            }}
+          >
+            Reporte General de Evaluaciones
+          </h2>
+
+          {/* Filtros con labels */}
           <div
             style={{
-              flex: "1 1 200px",
+              marginBottom: 20,
               display: "flex",
-              flexDirection: "column",
+              flexWrap: "wrap",
+              gap: 20,
             }}
           >
-            <label
-              htmlFor="filterCandidato"
-              style={{ fontWeight: "bold", marginBottom: 6, color: "#262d7d" }}
+            <div
+              style={{
+                flex: "1 1 200px",
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
-              Filtrar por candidato
-            </label>
-            <input
-              id="filterCandidato"
-              type="text"
-              placeholder="Filtrar por candidato"
-              value={filterCandidato}
-              onChange={(e) => setFilterCandidato(e.target.value)}
-              autoComplete="off"
-              style={inputStyle}
-            />
+              <label
+                htmlFor="filterCandidato"
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: 6,
+                  color: "#262d7d",
+                }}
+              >
+                Filtrar por candidato
+              </label>
+              <input
+                id="filterCandidato"
+                type="text"
+                placeholder="Filtrar por candidato"
+                value={filterCandidato}
+                onChange={(e) => setFilterCandidato(e.target.value)}
+                autoComplete="off"
+                style={inputStyle}
+              />
+            </div>
+
+            <div
+              style={{
+                flex: "1 1 200px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <label
+                htmlFor="filterEvaluacion"
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: 6,
+                  color: "#262d7d",
+                }}
+              >
+                Filtrar por evaluación
+              </label>
+              <input
+                id="filterEvaluacion"
+                type="text"
+                placeholder="Filtrar por evaluación"
+                value={filterEvaluacion}
+                onChange={(e) => setFilterEvaluacion(e.target.value)}
+                autoComplete="off"
+                style={inputStyle}
+              />
+            </div>
+
+            <div
+              style={{
+                flex: "1 1 200px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <label
+                htmlFor="filterFecha"
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: 6,
+                  color: "#262d7d",
+                }}
+              >
+                Filtrar por fecha
+              </label>
+              <input
+                id="filterFecha"
+                type="date"
+                value={filterFecha}
+                onChange={(e) => setFilterFecha(e.target.value)}
+                autoComplete="off"
+                style={inputStyle}
+              />
+            </div>
+
+            <button
+              style={{
+                ...buttonStyle,
+                flex: "0 0 120px",
+                alignSelf: "flex-end",
+              }}
+              onClick={() => fetchReports()}
+              title="Refrescar reportes"
+            >
+              Refrescar
+            </button>
           </div>
 
-          <div
-            style={{
-              flex: "1 1 200px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <label
-              htmlFor="filterEvaluacion"
-              style={{ fontWeight: "bold", marginBottom: 6, color: "#262d7d" }}
+          {/* Tabla con scroll */}
+          <div style={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: 700,
+              }}
             >
-              Filtrar por evaluación
-            </label>
-            <input
-              id="filterEvaluacion"
-              type="text"
-              placeholder="Filtrar por evaluación"
-              value={filterEvaluacion}
-              onChange={(e) => setFilterEvaluacion(e.target.value)}
-              autoComplete="off"
-              style={inputStyle}
-            />
-          </div>
-
-          <div
-            style={{
-              flex: "1 1 200px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <label
-              htmlFor="filterFecha"
-              style={{ fontWeight: "bold", marginBottom: 6, color: "#262d7d" }}
-            >
-              Filtrar por fecha
-            </label>
-            <input
-              id="filterFecha"
-              type="date"
-              value={filterFecha}
-              onChange={(e) => setFilterFecha(e.target.value)}
-              autoComplete="off"
-              style={inputStyle}
-            />
-          </div>
-
-          <button
-            style={{ ...buttonStyle, flex: "0 0 120px", alignSelf: "flex-end" }}
-            onClick={() => fetchReports()}
-            title="Refrescar reportes"
-          >
-            Refrescar
-          </button>
-        </div>
-
-        {/* Tabla con scroll horizontal */}
-        <div style={{ overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              minWidth: 700,
-            }}
-          >
-            <thead>
-              <tr>
-                <th style={thStyle} onClick={() => handleSort("candidato")}>
-                  Candidato{" "}
-                  {sortField === "candidato" ? (sortAsc ? "▲" : "▼") : ""}
-                </th>
-                <th style={thStyle} onClick={() => handleSort("evaluacion")}>
-                  Evaluación{" "}
-                  {sortField === "evaluacion" ? (sortAsc ? "▲" : "▼") : ""}
-                </th>
-                <th style={thStyle} onClick={() => handleSort("fecha")}>
-                  Fecha {sortField === "fecha" ? (sortAsc ? "▲" : "▼") : ""}
-                </th>
-                <th style={thStyle} onClick={() => handleSort("puntaje")}>
-                  Puntaje {sortField === "puntaje" ? (sortAsc ? "▲" : "▼") : ""}
-                </th>
-                <th style={thStyle}>Archivo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+              <thead>
                 <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
-                    Cargando reportes...
-                  </td>
+                  <th style={thStyle} onClick={() => handleSort("candidato")}>
+                    Candidato{" "}
+                    {sortField === "candidato" ? (sortAsc ? "▲" : "▼") : ""}
+                  </th>
+                  <th style={thStyle} onClick={() => handleSort("evaluacion")}>
+                    Evaluación{" "}
+                    {sortField === "evaluacion" ? (sortAsc ? "▲" : "▼") : ""}
+                  </th>
+                  <th style={thStyle} onClick={() => handleSort("fecha")}>
+                    Fecha {sortField === "fecha" ? (sortAsc ? "▲" : "▼") : ""}
+                  </th>
+                  <th style={thStyle} onClick={() => handleSort("puntaje")}>
+                    Puntaje{" "}
+                    {sortField === "puntaje" ? (sortAsc ? "▲" : "▼") : ""}
+                  </th>
+                  <th style={thStyle}>Archivo</th>
                 </tr>
-              ) : error ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    style={{ textAlign: "center", padding: 20, color: "red" }}
-                  >
-                    {error}
-                  </td>
-                </tr>
-              ) : paginatedReports.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    style={{ textAlign: "center", padding: 20, color: "#888" }}
-                  >
-                    No hay reportes que coincidan.
-                  </td>
-                </tr>
-              ) : (
-                paginatedReports.map((r) => (
-                  <tr
-                    key={r.id}
-                    style={{
-                      cursor: "default",
-                      transition: "background-color 0.3s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#e6f0ff")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "transparent")
-                    }
-                  >
-                    <td style={tdStyle}>{r.candidato}</td>
-                    <td style={tdStyle}>{r.evaluacion}</td>
-                    <td style={tdStyle}>{r.fecha}</td>
-                    <td style={tdStyle}>{r.puntaje}</td>
-                    <td style={tdStyle}>
-                      {r.archivoUrl ? (
-                        <a
-                          href={r.archivoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: "#262d7d", fontWeight: "bold" }}
-                        >
-                          Ver archivo
-                        </a>
-                      ) : (
-                        "Sin archivo"
-                      )}
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{ textAlign: "center", padding: 20 }}
+                    >
+                      Cargando reportes...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : error ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{ textAlign: "center", padding: 20, color: "red" }}
+                    >
+                      {error}
+                    </td>
+                  </tr>
+                ) : paginatedReports.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{
+                        textAlign: "center",
+                        padding: 20,
+                        color: "#888",
+                      }}
+                    >
+                      No hay reportes que coincidan.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedReports.map((r) => (
+                    <tr
+                      key={r.id}
+                      style={{
+                        cursor: "default",
+                        transition: "background-color 0.3s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#e6f0ff")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "transparent")
+                      }
+                    >
+                      <td style={tdStyle}>{r.candidato}</td>
+                      <td style={tdStyle}>{r.evaluacion}</td>
+                      <td style={tdStyle}>{r.fecha}</td>
+                      <td style={tdStyle}>{r.puntaje}</td>
+                      <td style={tdStyle}>
+                        {r.archivoUrl ? (
+                          <a
+                            href={r.archivoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "#262d7d", fontWeight: "bold" }}
+                          >
+                            Ver archivo
+                          </a>
+                        ) : (
+                          "Sin archivo"
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Paginación */}
-        <div
-          style={{
-            marginTop: 20,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <button
+          {/* Paginación */}
+          <div
             style={{
-              ...buttonStyle,
-              opacity: page === 1 ? 0.5 : 1,
-              width: 120,
+              marginTop: 20,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
-            disabled={page === 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
-            Anterior
-          </button>
-          <span style={{ margin: "0 15px", fontWeight: "bold" }}>
-            Página {page} de {totalPages || 1}
-          </span>
-          <button
-            style={{
-              ...buttonStyle,
-              opacity: page === totalPages ? 0.5 : 1,
-              width: 120,
-            }}
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
-            Siguiente
-          </button>
-        </div>
+            <button
+              style={{
+                ...buttonStyle,
+                opacity: page === 1 ? 0.5 : 1,
+                width: 120,
+              }}
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </button>
+            <span style={{ margin: "0 15px", fontWeight: "bold" }}>
+              Página {page} de {totalPages || 1}
+            </span>
+            <button
+              style={{
+                ...buttonStyle,
+                opacity: page === totalPages ? 0.5 : 1,
+                width: 120,
+              }}
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Siguiente
+            </button>
+          </div>
 
-        {/* Exportar */}
-        <div style={{ marginTop: 25 }}>
-          <button style={buttonStyle} onClick={() => exportToExcel()}>
-            Exportar a Excel
-          </button>
+          {/* Exportar */}
+          <div style={{ marginTop: 25 }}>
+            <button style={buttonStyle} onClick={() => exportToExcel()}>
+              Exportar a Excel
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
