@@ -264,7 +264,7 @@ export default function Evaluations() {
             boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
           }}
         >
-          <label style={{ fontWeight: "bold" }}>Título de evaluación</label>
+          <label style={{ fontWeight: "bold" }}>Nombre de evaluación</label>
           <input
             name="titulo"
             value={form.titulo}
