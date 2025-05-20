@@ -3,24 +3,6 @@ import type { ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-const logoStyle: React.CSSProperties = {
-  position: "fixed",
-  top: "50px",
-  right: "60px",
-  height: "150px",
-  objectFit: "contain",
-  zIndex: 10,
-};
-
-const actionButtonStyle: React.CSSProperties = {
-  marginRight: 10,
-  padding: "6px 12px",
-  borderRadius: 6,
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "bold",
-};
-
 const pageStyle: React.CSSProperties = {
   backgroundColor: "#262d7d",
   minHeight: "100vh",
@@ -263,7 +245,7 @@ export default function Results() {
       <h1 style={titleStyle}>Resultados de Evaluaciones</h1>
 
       {/* Formulario */}
-      <div style={{ maxWidth: 600 }}>
+      <div style={{ maxWidth: 600, marginBottom: 40 }}>
         <label style={labelStyle}>Nombre</label>
         <input
           type="text"
@@ -307,7 +289,7 @@ export default function Results() {
           type="file"
           accept="application/pdf"
           onChange={handleArchivoChange}
-          style={{ marginBottom: 24 }}
+          style={{ marginBottom: 20 }}
         />
 
         <label style={labelStyle}>Comentarios adicionales</label>
@@ -366,7 +348,12 @@ export default function Results() {
                 <td style={tdStyle}>
                   <button
                     style={{
-                      ...actionButtonStyle,
+                      marginRight: 10,
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      border: "none",
+                      cursor: "pointer",
+                      fontWeight: "bold",
                       backgroundColor: "#3498db",
                       color: "white",
                     }}
@@ -376,7 +363,11 @@ export default function Results() {
                   </button>
                   <button
                     style={{
-                      ...actionButtonStyle,
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      border: "none",
+                      cursor: "pointer",
+                      fontWeight: "bold",
                       backgroundColor: "#e74c3c",
                       color: "white",
                     }}
@@ -400,9 +391,6 @@ export default function Results() {
           Exportar a Excel
         </button>
       </div>
-
-      {/* Logo fijo */}
-      <img src="/logo.png" alt="Logo Specialisterne" style={logoStyle} />
     </div>
   );
 }
