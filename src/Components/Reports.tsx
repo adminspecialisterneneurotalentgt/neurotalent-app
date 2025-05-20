@@ -8,7 +8,6 @@ interface Report {
   evaluacion: string;
   fecha: string;
   puntaje: number;
-  archivoUrl?: string | null;
 }
 
 const thStyle: React.CSSProperties = {
@@ -17,24 +16,13 @@ const thStyle: React.CSSProperties = {
   padding: "12px 15px",
   textAlign: "left",
   borderBottom: "2px solid #1b2568",
-  cursor: "pointer",
-  userSelect: "none",
 };
 
 const tdStyle: React.CSSProperties = {
   padding: "12px 15px",
   borderBottom: "1px solid #ddd",
   color: "#333",
-};
-
-const inputStyle: React.CSSProperties = {
-  padding: "8px 12px",
-  borderRadius: 6,
-  border: "1px solid #ccc",
-  marginRight: 10,
-  marginBottom: 10,
-  minWidth: 200,
-  boxSizing: "border-box",
+  verticalAlign: "top",
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -42,39 +30,23 @@ const buttonStyle: React.CSSProperties = {
   color: "white",
   border: "none",
   borderRadius: 6,
-  padding: "10px 20px",
-  margin: "0 10px 10px 0",
+  padding: "14px 0",
+  width: "100%",
   cursor: "pointer",
   fontWeight: "bold",
+  fontSize: 18,
+  marginTop: 10,
 };
 
-const containerStyle: React.CSSProperties = {
-  backgroundColor: "white",
-  borderRadius: 16,
-  padding: 30,
-  maxWidth: 1000,
-  margin: "auto",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-  display: "flex",
-  flexDirection: "column",
-  position: "relative",
-};
-
-const pageStyle: React.CSSProperties = {
-  backgroundColor: "#262d7d",
-  minHeight: "100vh",
-  padding: 40,
-  color: "black",
+const inputStyle: React.CSSProperties = {
+  padding: "10px",
+  borderRadius: 6,
+  border: "1px solid #ccc",
+  marginRight: 10,
+  fontSize: 16,
+  color: "#333",
   boxSizing: "border-box",
-  position: "relative",
-};
-
-const logoStyle: React.CSSProperties = {
-  position: "absolute",
-  top: 30,
-  right: 30,
-  height: 140,
-  objectFit: "contain",
+  minWidth: 150,
 };
 
 export default function Reports() {
@@ -83,17 +55,21 @@ export default function Reports() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // filtros
   const [filterCandidato, setFilterCandidato] = useState("");
   const [filterEvaluacion, setFilterEvaluacion] = useState("");
   const [filterFecha, setFilterFecha] = useState("");
 
+  // orden
   const [sortField, setSortField] = useState<keyof Report | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
 
+  // paginación
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
 
+  // carga de datos simulado (cambia con tu backend)
   const fetchReports = async () => {
     setLoading(true);
     setError(null);
@@ -115,6 +91,7 @@ export default function Reports() {
 
   useEffect(() => {
     let data = [...reports];
+
     if (filterCandidato)
       data = data.filter((r) =>
         r.candidato.toLowerCase().includes(filterCandidato.toLowerCase())
@@ -132,8 +109,6 @@ export default function Reports() {
       data.sort((a, b) => {
         let valA = a[sortField];
         let valB = b[sortField];
-        if (valA == null) valA = ""; // evitar undefined/null
-        if (valB == null) valB = "";
         if (typeof valA === "string" && typeof valB === "string") {
           valA = valA.toLowerCase();
           valB = valB.toLowerCase();
@@ -143,6 +118,7 @@ export default function Reports() {
         return 0;
       });
     }
+
     setFilteredReports(data);
     setPage(1);
   }, [
@@ -160,9 +136,8 @@ export default function Reports() {
   );
 
   const handleSort = (field: keyof Report) => {
-    if (sortField === field) {
-      setSortAsc(!sortAsc);
-    } else {
+    if (sortField === field) setSortAsc(!sortAsc);
+    else {
       setSortField(field);
       setSortAsc(true);
     }
@@ -184,22 +159,51 @@ export default function Reports() {
   };
 
   return (
-    <div style={pageStyle}>
-      <div style={containerStyle}>
+    <div
+      style={{
+        backgroundColor: "#f9f9f9",
+        minHeight: "100vh",
+        padding: "40px 20px",
+        boxSizing: "border-box",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          borderRadius: 16,
+          padding: 30,
+          maxWidth: 1000,
+          margin: "auto",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+        }}
+      >
+        {/* Logo */}
+        <img
+          src="/logo.png"
+          alt="Logo"
+          style={{
+            position: "absolute",
+            top: 20,
+            right: 20,
+            height: 100,
+            objectFit: "contain",
+          }}
+        />
+
         <h2
           style={{
             color: "#262d7d",
             textAlign: "center",
-            marginBottom: 20,
+            marginBottom: 30,
             fontWeight: "bold",
             fontSize: 24,
           }}
         >
           Reporte General de Evaluaciones
         </h2>
-
-        {/* Logo */}
-        <img src="/logo.png" alt="Logo" style={logoStyle} />
 
         {/* Filtros */}
         <div
@@ -211,7 +215,7 @@ export default function Reports() {
           }}
         >
           <input
-            style={inputStyle}
+            style={{ ...inputStyle, flex: "1 1 200px" }}
             type="text"
             placeholder="Filtrar por candidato"
             value={filterCandidato}
@@ -219,7 +223,7 @@ export default function Reports() {
             autoComplete="off"
           />
           <input
-            style={inputStyle}
+            style={{ ...inputStyle, flex: "1 1 200px" }}
             type="text"
             placeholder="Filtrar por evaluación"
             value={filterEvaluacion}
@@ -227,16 +231,16 @@ export default function Reports() {
             autoComplete="off"
           />
           <input
-            style={inputStyle}
-            type="text"
-            placeholder="Filtrar por fecha (ej: 2023-05-01)"
+            style={{ ...inputStyle, flex: "1 1 200px" }}
+            type="date"
+            placeholder="Filtrar por fecha"
             value={filterFecha}
             onChange={(e) => setFilterFecha(e.target.value)}
             autoComplete="off"
           />
           <button
-            style={{ ...buttonStyle, marginLeft: "auto" }}
-            onClick={fetchReports}
+            style={{ ...buttonStyle, flex: "0 0 auto", minWidth: 120 }}
+            onClick={() => fetchReports()}
             title="Refrescar reportes"
           >
             Refrescar
@@ -268,20 +272,19 @@ export default function Reports() {
                 <th style={thStyle} onClick={() => handleSort("puntaje")}>
                   Puntaje {sortField === "puntaje" ? (sortAsc ? "▲" : "▼") : ""}
                 </th>
-                <th style={thStyle}>Archivo</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
+                  <td colSpan={4} style={{ textAlign: "center", padding: 20 }}>
                     Cargando reportes...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     style={{ textAlign: "center", padding: 20, color: "red" }}
                   >
                     {error}
@@ -290,7 +293,7 @@ export default function Reports() {
               ) : paginatedReports.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     style={{ textAlign: "center", padding: 20, color: "#888" }}
                   >
                     No hay reportes que coincidan.
@@ -315,19 +318,6 @@ export default function Reports() {
                     <td style={tdStyle}>{r.evaluacion}</td>
                     <td style={tdStyle}>{r.fecha}</td>
                     <td style={tdStyle}>{r.puntaje}</td>
-                    <td style={tdStyle}>
-                      {r.archivoUrl ? (
-                        <a
-                          href={r.archivoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Ver archivo
-                        </a>
-                      ) : (
-                        "Sin archivo"
-                      )}
-                    </td>
                   </tr>
                 ))
               )}
@@ -363,13 +353,9 @@ export default function Reports() {
           </button>
         </div>
 
-        {/* Botón exportar */}
-        <div style={{ marginTop: 25, textAlign: "center" }}>
-          <button
-            style={buttonStyle}
-            onClick={exportToExcel}
-            title="Exportar reportes a Excel"
-          >
+        {/* Exportar */}
+        <div style={{ marginTop: 25 }}>
+          <button style={buttonStyle} onClick={() => exportToExcel()}>
             Exportar a Excel
           </button>
         </div>
