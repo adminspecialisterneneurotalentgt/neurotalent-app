@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export default function Reports() {
+  // Estado para los reportes
   const [reports, setReports] = useState<
     {
       id: number;
@@ -14,16 +15,19 @@ export default function Reports() {
       comentarios: string;
     }[]
   >([]);
+
+  // Paginación
   const [paginaActual, setPaginaActual] = useState(1);
   const resultadosPorPagina = 5;
-
   const totalPaginas = Math.ceil(reports.length / resultadosPorPagina);
   const inicio = (paginaActual - 1) * resultadosPorPagina;
   const fin = inicio + resultadosPorPagina;
   const resultadosPagina = reports.slice(inicio, fin);
 
+  // Estado para edición
   const [editId, setEditId] = useState<number | null>(null);
 
+  // Campos del formulario
   const [candidato, setCandidato] = useState("");
   const [evaluacion, setEvaluacion] = useState("");
   const [puntaje, setPuntaje] = useState("");
@@ -31,6 +35,7 @@ export default function Reports() {
   const [archivoUrl, setArchivoUrl] = useState<string | null>(null);
   const [comentarios, setComentarios] = useState("");
 
+  // Maneja selección de archivo PDF
   const handleArchivoChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
       setArchivoUrl(null);
@@ -43,11 +48,11 @@ export default function Reports() {
       setArchivoUrl(null);
       return;
     }
-    // En este ejemplo creamos URL local para previsualizar
     const url = URL.createObjectURL(file);
     setArchivoUrl(url);
   };
 
+  // Limpia formulario
   const limpiarFormulario = () => {
     setCandidato("");
     setEvaluacion("");
@@ -62,6 +67,7 @@ export default function Reports() {
     setEditId(null);
   };
 
+  // Agregar o actualizar reporte
   const handleAgregar = () => {
     if (!candidato || !evaluacion || !puntaje || !fecha) {
       alert("Por favor completa todos los campos obligatorios.");
@@ -109,6 +115,7 @@ export default function Reports() {
     }
   };
 
+  // Eliminar reporte
   const handleEliminar = (id: number) => {
     if (confirm("¿Estás seguro de eliminar este reporte?")) {
       setReports((prev) => prev.filter((r) => r.id !== id));
@@ -116,6 +123,7 @@ export default function Reports() {
     }
   };
 
+  // Editar reporte: carga datos en formulario
   const handleEditar = (id: number) => {
     const rep = reports.find((r) => r.id === id);
     if (!rep) return;
@@ -128,6 +136,7 @@ export default function Reports() {
     setComentarios(rep.comentarios);
   };
 
+  // Exportar a Excel
   const exportarExcel = () => {
     if (reports.length === 0) {
       alert("No hay reportes para exportar.");
@@ -142,7 +151,7 @@ export default function Reports() {
     saveAs(blob, "ReportesEvaluaciones.xlsx");
   };
 
-  // Estilos igual que Results
+  // Estilos (copiados de Results para mantener la misma visual)
   const pageStyle: React.CSSProperties = {
     maxWidth: "1000px",
     margin: "0 auto",
@@ -152,9 +161,9 @@ export default function Reports() {
 
   const containerStyle: React.CSSProperties = {
     backgroundColor: "#f9f9f9",
-    padding: "20px",
-    borderRadius: "10px",
-    marginBottom: "30px",
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 30,
     boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
   };
 
@@ -167,8 +176,8 @@ export default function Reports() {
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
-    padding: "10px",
-    borderRadius: "6px",
+    padding: 10,
+    borderRadius: 6,
     border: "1px solid #ccc",
     marginBottom: 15,
     fontSize: 16,
@@ -231,10 +240,8 @@ export default function Reports() {
 
   return (
     <div style={pageStyle}>
-      {/* Regresar */}
-      <div
-        style={{ position: "fixed", top: "20px", left: "20px", zIndex: 1000 }}
-      >
+      {/* Botón regresar fijo arriba */}
+      <div style={{ position: "fixed", top: 20, left: 20, zIndex: 1000 }}>
         <button
           onClick={() => window.history.back()}
           style={{
@@ -242,7 +249,7 @@ export default function Reports() {
             border: "none",
             color: "#262d7d",
             fontWeight: "bold",
-            fontSize: "16px",
+            fontSize: 16,
             cursor: "pointer",
             textDecoration: "underline",
           }}
@@ -251,12 +258,13 @@ export default function Reports() {
         </button>
       </div>
 
+      {/* Título */}
       <h2
         style={{
           textAlign: "center",
           color: "#262d7d",
-          marginTop: "60px",
-          fontSize: "28px",
+          marginTop: 60,
+          fontSize: 28,
         }}
       >
         Reportes de Evaluaciones
@@ -265,19 +273,19 @@ export default function Reports() {
       {/* Logo */}
       <div style={{ position: "relative" }}>
         <img
-          src="/logo.png"
+          src="/logo.png" // Ajusta si tu logo está en otra ruta
           alt="Logo"
           style={{
             position: "absolute",
-            top: "10px",
-            right: "-450px",
-            height: "350px",
+            top: 10,
+            right: -450,
+            height: 350,
             objectFit: "contain",
           }}
         />
       </div>
 
-      {/* Contenedor formulario */}
+      {/* Formulario para agregar/editar */}
       <div style={containerStyle}>
         <label style={labelStyle}>Candidato</label>
         <input
@@ -338,12 +346,12 @@ export default function Reports() {
         </button>
       </div>
 
-      {/* Tabla resultados */}
+      {/* Tabla de reportes */}
       <div style={containerStyle}>
         <table
           style={{
             ...tableStyle,
-            minWidth: "900px",
+            minWidth: 900,
             maxWidth: "100%",
             margin: "0 auto",
           }}
@@ -440,8 +448,8 @@ export default function Reports() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          gap: "20px",
-          marginTop: "30px",
+          gap: 20,
+          marginTop: 30,
         }}
       >
         <button
@@ -455,9 +463,7 @@ export default function Reports() {
         >
           ⬅ Anterior
         </button>
-        <span
-          style={{ fontSize: "16px", fontWeight: "bold", color: "#262d7d" }}
-        >
+        <span style={{ fontSize: 16, fontWeight: "bold", color: "#262d7d" }}>
           Página {paginaActual} de {totalPaginas}
         </span>
         <button
