@@ -59,6 +59,10 @@ export default function Candidates() {
     return date.toISOString().slice(0, 10); // yyyy-MM-dd
   };
   const handleAddOrUpdate = async () => {
+    console.log("handleAddOrUpdate invoked"); // <-- esto ayuda a saber si se llama la función
+    if (!firstName || !lastName || !email) {
+      return alert("Completa todos los campos");
+    }
     if (!firstName || !lastName || !email)
       return alert("Completa todos los campos");
 
