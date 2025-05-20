@@ -189,7 +189,7 @@ export default function Reports() {
           position: "fixed",
           top: 40,
           right: 40,
-          height: 3500, // más grande
+          height: 350, // más grande
           objectFit: "contain",
           zIndex: 900,
         }}
