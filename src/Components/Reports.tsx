@@ -12,17 +12,29 @@ interface Report {
 }
 
 const thStyle: React.CSSProperties = {
-  backgroundColor: "#f1f1f1",
-  padding: "10px",
+  backgroundColor: "#262d7d", // Color azul oscuro igual que encabezados de otros módulos
+  color: "white",
+  padding: "12px 15px",
   textAlign: "left",
-  borderBottom: "2px solid #ccc",
+  borderBottom: "2px solid #1b2568",
   cursor: "pointer",
   userSelect: "none",
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: "10px",
+  padding: "12px 15px",
   borderBottom: "1px solid #ddd",
+  color: "#333",
+};
+
+const inputStyle: React.CSSProperties = {
+  padding: "8px 12px",
+  borderRadius: 6,
+  border: "1px solid #ccc",
+  marginRight: 10,
+  marginBottom: 10,
+  minWidth: 200,
+  boxSizing: "border-box",
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -31,17 +43,29 @@ const buttonStyle: React.CSSProperties = {
   border: "none",
   borderRadius: 6,
   padding: "10px 20px",
-  margin: "0 10px",
+  margin: "0 10px 10px 0",
   cursor: "pointer",
   fontWeight: "bold",
 };
 
-const inputStyle: React.CSSProperties = {
-  padding: "8px 12px",
-  borderRadius: 6,
-  border: "1px solid #ccc",
-  marginRight: 10,
-  minWidth: 150,
+const containerStyle: React.CSSProperties = {
+  backgroundColor: "white",
+  borderRadius: 16,
+  padding: 30,
+  maxWidth: 1000,
+  margin: "auto",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+  display: "flex",
+  flexDirection: "column",
+};
+
+const pageStyle: React.CSSProperties = {
+  backgroundColor: "#262d7d",
+  minHeight: "100vh",
+  padding: 40,
+  color: "black",
+  boxSizing: "border-box",
+  position: "relative",
 };
 
 export default function Reports() {
@@ -66,12 +90,12 @@ export default function Reports() {
 
   const navigate = useNavigate();
 
-  // Función para cargar datos (simulada aquí, cambia URL por backend real)
+  // Simulación de carga de datos
   const fetchReports = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Ejemplo: cambiar URL a tu endpoint real
+      // Aquí cambiar por endpoint real
       const response = await fetch("/api/reports");
       if (!response.ok) throw new Error("Error al cargar los reportes");
       const data: Report[] = await response.json();
@@ -87,11 +111,9 @@ export default function Reports() {
     fetchReports();
   }, []);
 
-  // Filtrar y ordenar cuando cambien datos o filtros
+  // Filtrar y ordenar
   useEffect(() => {
     let data = [...reports];
-
-    // Filtrar
     if (filterCandidato)
       data = data.filter((r) =>
         r.candidato.toLowerCase().includes(filterCandidato.toLowerCase())
@@ -105,7 +127,6 @@ export default function Reports() {
         r.fecha.toLowerCase().includes(filterFecha.toLowerCase())
       );
 
-    // Ordenar
     if (sortField) {
       data.sort((a, b) => {
         let valA = a[sortField];
@@ -119,9 +140,8 @@ export default function Reports() {
         return 0;
       });
     }
-
     setFilteredReports(data);
-    setPage(1); // reset pagina al cambiar filtro/orden
+    setPage(1);
   }, [
     reports,
     filterCandidato,
@@ -131,7 +151,7 @@ export default function Reports() {
     sortAsc,
   ]);
 
-  // Paginacion actual
+  // Paginación actual
   const paginatedReports = filteredReports.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
@@ -164,27 +184,26 @@ export default function Reports() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#262d7d",
-        minHeight: "100vh",
-        padding: "40px",
-        color: "black",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "white",
-          borderRadius: 16,
-          padding: 30,
-          maxWidth: 1000,
-          margin: "auto",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+    <div style={pageStyle}>
+      {/* Botón regresar fijo arriba */}
+      <div style={{ position: "fixed", top: 20, left: 20, zIndex: 1000 }}>
+        <button
+          onClick={() => navigate("/dashboard")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: 16,
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+        >
+          ← Regresar a Dashboard
+        </button>
+      </div>
+
+      <div style={containerStyle}>
         <h2
           style={{
             color: "#262d7d",
@@ -198,7 +217,14 @@ export default function Reports() {
         </h2>
 
         {/* Filtros */}
-        <div style={{ marginBottom: 20, display: "flex", flexWrap: "wrap" }}>
+        <div
+          style={{
+            marginBottom: 20,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
           <input
             style={inputStyle}
             type="text"
@@ -225,7 +251,7 @@ export default function Reports() {
           />
           <button
             style={{ ...buttonStyle, marginLeft: "auto" }}
-            onClick={() => fetchReports()}
+            onClick={fetchReports}
             title="Refrescar reportes"
           >
             Refrescar
