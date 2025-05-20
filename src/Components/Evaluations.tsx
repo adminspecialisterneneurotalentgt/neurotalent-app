@@ -54,6 +54,10 @@ export default function Evaluations() {
   const canDelete = role === "admin";
   const canExport = role === "admin";
 
+  // Estados paginación
+  const [paginaActual, setPaginaActual] = useState(1);
+  const resultadosPorPagina = 5;
+
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [form, setForm] = useState<Omit<Evaluation, "id" | "documentoUrl">>({
     titulo: "",
@@ -71,6 +75,12 @@ export default function Evaluations() {
     estado: "",
     fecha: "",
   });
+
+  // Cálculos para paginación
+  const totalPaginas = Math.ceil(evaluations.length / resultadosPorPagina);
+  const inicio = (paginaActual - 1) * resultadosPorPagina;
+  const fin = inicio + resultadosPorPagina;
+  const resultadosPagina = evaluations.slice(inicio, fin);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -456,7 +466,7 @@ export default function Evaluations() {
           </tr>
         </thead>
         <tbody>
-          {evaluations
+          {resultadosPagina
             .filter(
               (ev) =>
                 (!filtros.tipo || ev.tipo === filtros.tipo) &&
@@ -540,6 +550,51 @@ export default function Evaluations() {
           </button>
         </div>
       )}
+
+      {/* Paginación */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+          marginTop: "30px",
+        }}
+      >
+        <button
+          onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
+          disabled={paginaActual === 1}
+          style={{
+            ...buttonStyle,
+            opacity: paginaActual === 1 ? 0.5 : 1,
+            cursor: paginaActual === 1 ? "not-allowed" : "pointer",
+          }}
+        >
+          ⬅ Anterior
+        </button>
+        <span
+          style={{ fontSize: "16px", fontWeight: "bold", color: "#262d7d" }}
+        >
+          Página {paginaActual} de {totalPaginas}
+        </span>
+        <button
+          onClick={() =>
+            setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
+          }
+          disabled={paginaActual === totalPaginas || totalPaginas === 0}
+          style={{
+            ...buttonStyle,
+            opacity:
+              paginaActual === totalPaginas || totalPaginas === 0 ? 0.5 : 1,
+            cursor:
+              paginaActual === totalPaginas || totalPaginas === 0
+                ? "not-allowed"
+                : "pointer",
+          }}
+        >
+          Siguiente ➡
+        </button>
+      </div>
     </div>
   );
 }

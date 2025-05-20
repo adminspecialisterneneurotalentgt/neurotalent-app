@@ -14,6 +14,14 @@ export default function Results() {
       comentarios: string;
     }[]
   >([]);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const resultadosPorPagina = 5;
+
+  const totalPaginas = Math.ceil(resultados.length / resultadosPorPagina);
+  const inicio = (paginaActual - 1) * resultadosPorPagina;
+  const fin = inicio + resultadosPorPagina;
+  const resultadosPagina = resultados.slice(inicio, fin);
+
   const [editId, setEditId] = useState<number | null>(null);
 
   const [nombre, setNombre] = useState("");
@@ -365,7 +373,7 @@ export default function Results() {
                 </td>
               </tr>
             ) : (
-              resultados.map((res) => (
+              resultadosPagina.map((res) => (
                 <tr key={res.id}>
                   <td style={tdStyle}>{res.nombre}</td>
                   <td style={tdStyle}>{res.evaluacion}</td>
@@ -412,6 +420,50 @@ export default function Results() {
             Exportar a Excel
           </button>
         </div>
+      </div>
+      {/* Paginación */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+          marginTop: "30px",
+        }}
+      >
+        <button
+          onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
+          disabled={paginaActual === 1}
+          style={{
+            ...buttonStyle,
+            opacity: paginaActual === 1 ? 0.5 : 1,
+            cursor: paginaActual === 1 ? "not-allowed" : "pointer",
+          }}
+        >
+          ⬅ Anterior
+        </button>
+        <span
+          style={{ fontSize: "16px", fontWeight: "bold", color: "#262d7d" }}
+        >
+          Página {paginaActual} de {totalPaginas}
+        </span>
+        <button
+          onClick={() =>
+            setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
+          }
+          disabled={paginaActual === totalPaginas || totalPaginas === 0}
+          style={{
+            ...buttonStyle,
+            opacity:
+              paginaActual === totalPaginas || totalPaginas === 0 ? 0.5 : 1,
+            cursor:
+              paginaActual === totalPaginas || totalPaginas === 0
+                ? "not-allowed"
+                : "pointer",
+          }}
+        >
+          Siguiente ➡
+        </button>
       </div>
     </div>
   );
