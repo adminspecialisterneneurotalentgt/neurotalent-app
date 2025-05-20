@@ -2,98 +2,6 @@ import React, { useState, type ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-const pageStyle: React.CSSProperties = {
-  backgroundColor: "#fff",
-  minHeight: "100vh",
-  padding: "40px 60px",
-  color: "#262d7d",
-  maxWidth: 720,
-  width: "90%",
-  margin: "0 auto",
-  boxSizing: "border-box",
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-};
-
-const containerStyle: React.CSSProperties = {
-  backgroundColor: "#f9f9f9", // gris muy suave como en evaluations
-  padding: 20,
-  borderRadius: 10,
-  marginBottom: 30,
-  boxShadow: "0 4px 10px rgba(0,0,0,0.1)", // sombra suave
-  position: "relative",
-};
-
-const labelStyle: React.CSSProperties = {
-  fontWeight: "bold",
-  marginBottom: 6,
-  display: "block",
-  color: "#262d7d",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "10px",
-  borderRadius: 6,
-  border: "1px solid #ccc",
-  marginBottom: 15,
-  fontSize: 16,
-  boxSizing: "border-box",
-  color: "#333",
-  backgroundColor: "white", // blanco para inputs
-};
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  resize: "vertical",
-  minHeight: 70,
-};
-
-const buttonStyle: React.CSSProperties = {
-  backgroundColor: "#262d7d",
-  color: "white",
-  padding: "14px 0",
-  width: "100%",
-  border: "none",
-  borderRadius: 6,
-  cursor: "pointer",
-  fontWeight: "bold",
-  fontSize: 18,
-  marginTop: 10,
-};
-
-const tableStyle: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontSize: 16,
-  borderRadius: 8,
-  overflow: "hidden",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-};
-
-const thStyle: React.CSSProperties = {
-  backgroundColor: "#262d7d",
-  color: "white",
-  padding: "12px 15px",
-  textAlign: "left",
-  borderBottom: "2px solid #1b2568",
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: "12px 15px",
-  borderBottom: "1px solid #ddd",
-  color: "#333",
-  verticalAlign: "top",
-};
-
-const actionButtonStyle: React.CSSProperties = {
-  marginRight: 10,
-  padding: "6px 12px",
-  borderRadius: 6,
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "bold",
-};
-
 export default function Results() {
   const [resultados, setResultados] = useState<
     {
@@ -224,6 +132,93 @@ export default function Results() {
     saveAs(blob, "ResultadosEvaluaciones.xlsx");
   };
 
+  // Estilos del componente, igual que en Evaluations
+  const pageStyle: React.CSSProperties = {
+    maxWidth: "1000px",
+    margin: "0 auto",
+    marginBottom: "10px",
+    position: "relative",
+  };
+
+  const containerStyle: React.CSSProperties = {
+    backgroundColor: "#f9f9f9",
+    padding: "20px",
+    borderRadius: "10px",
+    marginBottom: "30px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontWeight: "bold",
+    marginBottom: 6,
+    display: "block",
+    color: "#262d7d",
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+    marginBottom: 15,
+    fontSize: 16,
+    boxSizing: "border-box",
+    color: "#333",
+    backgroundColor: "white",
+  };
+
+  const textareaStyle: React.CSSProperties = {
+    ...inputStyle,
+    resize: "vertical",
+    minHeight: 70,
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    backgroundColor: "#262d7d",
+    color: "white",
+    padding: "14px 0",
+    width: "100%",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: 18,
+    marginTop: 10,
+  };
+
+  const tableStyle: React.CSSProperties = {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: 16,
+    borderRadius: 8,
+    overflow: "hidden",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  };
+
+  const thStyle: React.CSSProperties = {
+    backgroundColor: "#262d7d",
+    color: "white",
+    padding: "12px 15px",
+    textAlign: "left",
+    borderBottom: "2px solid #1b2568",
+  };
+
+  const tdStyle: React.CSSProperties = {
+    padding: "12px 15px",
+    borderBottom: "1px solid #ddd",
+    color: "#333",
+    verticalAlign: "top",
+  };
+
+  const actionButtonStyle: React.CSSProperties = {
+    marginRight: 10,
+    padding: "6px 12px",
+    borderRadius: 6,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+  };
+
   return (
     <div style={pageStyle}>
       {/* Regresar */}
@@ -246,7 +241,6 @@ export default function Results() {
         </button>
       </div>
 
-      {/* Título */}
       <h2
         style={{
           textAlign: "center",
@@ -257,21 +251,6 @@ export default function Results() {
       >
         Resultados de Evaluaciones
       </h2>
-
-      {/* Logo */}
-      <div style={{ position: "relative" }}>
-        <img
-          src="/logo.png"
-          alt="Logo"
-          style={{
-            position: "absolute",
-            top: "10px",
-            right: "-450px",
-            height: "350px",
-            objectFit: "contain",
-          }}
-        />
-      </div>
 
       {/* Contenedor formulario */}
       <div style={containerStyle}>
