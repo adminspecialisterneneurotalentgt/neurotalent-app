@@ -191,6 +191,7 @@ export default function Reports() {
           right: "-450px",
           height: "350px",
           objectFit: "contain",
+          zIndex: 900,
         }}
       />
 
