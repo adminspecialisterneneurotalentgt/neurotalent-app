@@ -2,58 +2,56 @@ import React, { useState, type ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-export default function Reports() {
-  const [reports, setReports] = useState<
+export default function Results() {
+  const [resultados, setResultados] = useState<
     {
       id: number;
-      candidato: string;
+      nombre: string;
       evaluacion: string;
       puntaje: number;
       fecha: string;
-      archivoUrl?: string | null;
+      archivoPDF?: File | null;
       comentarios: string;
     }[]
   >([]);
   const [paginaActual, setPaginaActual] = useState(1);
   const resultadosPorPagina = 5;
 
-  const totalPaginas = Math.ceil(reports.length / resultadosPorPagina);
+  const totalPaginas = Math.ceil(resultados.length / resultadosPorPagina);
   const inicio = (paginaActual - 1) * resultadosPorPagina;
   const fin = inicio + resultadosPorPagina;
-  const resultadosPagina = reports.slice(inicio, fin);
+  const resultadosPagina = resultados.slice(inicio, fin);
 
   const [editId, setEditId] = useState<number | null>(null);
 
-  const [candidato, setCandidato] = useState("");
+  const [nombre, setNombre] = useState("");
   const [evaluacion, setEvaluacion] = useState("");
   const [puntaje, setPuntaje] = useState("");
   const [fecha, setFecha] = useState("");
-  const [archivoUrl, setArchivoUrl] = useState<string | null>(null);
+  const [archivoPDF, setArchivoPDF] = useState<File | null>(null);
   const [comentarios, setComentarios] = useState("");
 
   const handleArchivoChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
-      setArchivoUrl(null);
+      setArchivoPDF(null);
       return;
     }
     const file = e.target.files[0];
     if (file.type !== "application/pdf") {
       alert("Solo se permiten archivos PDF.");
       e.target.value = "";
-      setArchivoUrl(null);
+      setArchivoPDF(null);
       return;
     }
-    // En este ejemplo creamos URL local para previsualizar
-    const url = URL.createObjectURL(file);
-    setArchivoUrl(url);
+    setArchivoPDF(file);
   };
 
   const limpiarFormulario = () => {
-    setCandidato("");
+    setNombre("");
     setEvaluacion("");
     setPuntaje("");
     setFecha("");
-    setArchivoUrl(null);
+    setArchivoPDF(null);
     setComentarios("");
     const inputFile = document.getElementById(
       "archivoInput"
@@ -63,11 +61,11 @@ export default function Reports() {
   };
 
   const handleAgregar = () => {
-    if (!candidato || !evaluacion || !puntaje || !fecha) {
+    if (!nombre || !evaluacion || !puntaje || !fecha) {
       alert("Por favor completa todos los campos obligatorios.");
       return;
     }
-    if (!archivoUrl) {
+    if (!archivoPDF) {
       alert("Por favor selecciona un archivo PDF.");
       return;
     }
@@ -78,16 +76,16 @@ export default function Reports() {
     }
 
     if (editId !== null) {
-      setReports((prev) =>
+      setResultados((prev) =>
         prev.map((r) =>
           r.id === editId
             ? {
                 id: editId,
-                candidato,
+                nombre,
                 evaluacion,
                 puntaje: puntajeNum,
                 fecha,
-                archivoUrl,
+                archivoPDF,
                 comentarios,
               }
             : r
@@ -97,52 +95,52 @@ export default function Reports() {
     } else {
       const nuevo = {
         id: Date.now(),
-        candidato,
+        nombre,
         evaluacion,
         puntaje: puntajeNum,
         fecha,
-        archivoUrl,
+        archivoPDF,
         comentarios,
       };
-      setReports([...reports, nuevo]);
+      setResultados([...resultados, nuevo]);
       limpiarFormulario();
     }
   };
 
   const handleEliminar = (id: number) => {
-    if (confirm("¿Estás seguro de eliminar este reporte?")) {
-      setReports((prev) => prev.filter((r) => r.id !== id));
+    if (confirm("¿Estás seguro de eliminar este resultado?")) {
+      setResultados((prev) => prev.filter((r) => r.id !== id));
       if (editId === id) limpiarFormulario();
     }
   };
 
   const handleEditar = (id: number) => {
-    const rep = reports.find((r) => r.id === id);
-    if (!rep) return;
+    const res = resultados.find((r) => r.id === id);
+    if (!res) return;
     setEditId(id);
-    setCandidato(rep.candidato);
-    setEvaluacion(rep.evaluacion);
-    setPuntaje(rep.puntaje.toString());
-    setFecha(rep.fecha);
-    setArchivoUrl(rep.archivoUrl || null);
-    setComentarios(rep.comentarios);
+    setNombre(res.nombre);
+    setEvaluacion(res.evaluacion);
+    setPuntaje(res.puntaje.toString());
+    setFecha(res.fecha);
+    setArchivoPDF(res.archivoPDF || null);
+    setComentarios(res.comentarios);
   };
 
   const exportarExcel = () => {
-    if (reports.length === 0) {
-      alert("No hay reportes para exportar.");
+    if (resultados.length === 0) {
+      alert("No hay resultados para exportar.");
       return;
     }
-    const datos = reports.map(({ id, ...rest }) => rest);
+    const datos = resultados.map(({ id, archivoPDF, ...rest }) => rest);
     const ws = XLSX.utils.json_to_sheet(datos);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Reportes");
+    XLSX.utils.book_append_sheet(wb, ws, "Resultados");
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, "ReportesEvaluaciones.xlsx");
+    saveAs(blob, "ResultadosEvaluaciones.xlsx");
   };
 
-  // Estilos igual que Results
+  // Estilos del componente, igual que en Evaluations
   const pageStyle: React.CSSProperties = {
     maxWidth: "1000px",
     margin: "0 auto",
@@ -162,7 +160,7 @@ export default function Reports() {
     fontWeight: "bold",
     marginBottom: 6,
     display: "block",
-    color: "#000",
+    color: "#black",
   };
 
   const inputStyle: React.CSSProperties = {
@@ -259,7 +257,7 @@ export default function Reports() {
           fontSize: "28px",
         }}
       >
-        Reportes de Evaluaciones
+        Resultados de Evaluaciones
       </h2>
 
       {/* Logo */}
@@ -279,11 +277,11 @@ export default function Reports() {
 
       {/* Contenedor formulario */}
       <div style={containerStyle}>
-        <label style={labelStyle}>Candidato</label>
+        <label style={labelStyle}>Nombre</label>
         <input
           type="text"
-          value={candidato}
-          onChange={(e) => setCandidato(e.target.value)}
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
           style={inputStyle}
           placeholder="Nombre del candidato"
         />
@@ -343,14 +341,14 @@ export default function Reports() {
         <table
           style={{
             ...tableStyle,
-            minWidth: "900px",
-            maxWidth: "100%",
-            margin: "0 auto",
+            minWidth: "900px", // ancho mínimo para que no se comprima
+            maxWidth: "100%", // para que no se salga del contenedor
+            margin: "0 auto", // para centrar horizontalmente
           }}
         >
           <thead>
             <tr>
-              <th style={thStyle}>Candidato</th>
+              <th style={thStyle}>Nombre</th>
               <th style={thStyle}>Evaluación</th>
               <th style={thStyle}>Puntaje</th>
               <th style={thStyle}>Fecha</th>
@@ -360,7 +358,7 @@ export default function Reports() {
             </tr>
           </thead>
           <tbody>
-            {reports.length === 0 ? (
+            {resultados.length === 0 ? (
               <tr>
                 <td
                   colSpan={7}
@@ -371,30 +369,20 @@ export default function Reports() {
                     color: "#888",
                   }}
                 >
-                  No hay reportes registrados.
+                  No hay resultados registrados.
                 </td>
               </tr>
             ) : (
-              resultadosPagina.map((rep) => (
-                <tr key={rep.id}>
-                  <td style={tdStyle}>{rep.candidato}</td>
-                  <td style={tdStyle}>{rep.evaluacion}</td>
-                  <td style={tdStyle}>{rep.puntaje}</td>
-                  <td style={tdStyle}>{rep.fecha}</td>
+              resultadosPagina.map((res) => (
+                <tr key={res.id}>
+                  <td style={tdStyle}>{res.nombre}</td>
+                  <td style={tdStyle}>{res.evaluacion}</td>
+                  <td style={tdStyle}>{res.puntaje}</td>
+                  <td style={tdStyle}>{res.fecha}</td>
                   <td style={tdStyle}>
-                    {rep.archivoUrl ? (
-                      <a
-                        href={rep.archivoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Ver archivo
-                      </a>
-                    ) : (
-                      "Sin archivo"
-                    )}
+                    {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
                   </td>
-                  <td style={tdStyle}>{rep.comentarios}</td>
+                  <td style={tdStyle}>{res.comentarios}</td>
                   <td style={tdStyle}>
                     <button
                       style={{
@@ -402,7 +390,7 @@ export default function Reports() {
                         backgroundColor: "#3498db",
                         color: "white",
                       }}
-                      onClick={() => handleEditar(rep.id)}
+                      onClick={() => handleEditar(res.id)}
                     >
                       Editar
                     </button>
@@ -412,7 +400,7 @@ export default function Reports() {
                         backgroundColor: "#e74c3c",
                         color: "white",
                       }}
-                      onClick={() => handleEliminar(rep.id)}
+                      onClick={() => handleEliminar(res.id)}
                     >
                       Eliminar
                     </button>
@@ -433,7 +421,6 @@ export default function Reports() {
           </button>
         </div>
       </div>
-
       {/* Paginación */}
       <div
         style={{
