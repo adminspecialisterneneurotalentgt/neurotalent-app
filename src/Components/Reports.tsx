@@ -181,12 +181,29 @@ export default function Reports() {
         </button>
       </div>
 
+      {/* Imagen fuera de la caja, posicionada */}
+      <img
+        src="/logo.png"
+        alt="Logo"
+        style={{
+          position: "fixed",
+          top: 40,
+          right: 40,
+          height: 180, // más grande
+          objectFit: "contain",
+          zIndex: 900,
+        }}
+      />
+
+      {/* Caja blanca principal */}
       <div
         style={{
           backgroundColor: "#f9f9f9",
           minHeight: "100vh",
           padding: "40px 20px",
           boxSizing: "border-box",
+          maxWidth: 1000,
+          margin: "auto",
         }}
       >
         <div
@@ -194,28 +211,13 @@ export default function Reports() {
             backgroundColor: "white",
             borderRadius: 16,
             padding: 30,
-            maxWidth: 1000,
-            margin: "auto",
             boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
             display: "flex",
             flexDirection: "column",
             position: "relative",
           }}
         >
-          {/* Logo a la derecha */}
-          <img
-            src="/logo.png"
-            alt="Logo"
-            style={{
-              position: "absolute",
-              top: 20,
-              right: 20,
-              height: 100,
-              objectFit: "contain",
-            }}
-          />
-
-          {/* Titulo */}
+          {/* Título */}
           <h2
             style={{
               color: "#262d7d",
