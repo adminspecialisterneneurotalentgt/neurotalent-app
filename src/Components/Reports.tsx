@@ -138,7 +138,7 @@ export default function Reports() {
     }
   };
 
-  const exportToExcel = () => {
+  const exportarExcel = () => {
     const wb = XLSX.utils.book_new();
     const wsData = filteredReports.map((r) => ({
       Candidato: r.candidato,
@@ -473,8 +473,11 @@ export default function Reports() {
           </div>
 
           {/* Exportar */}
-          <div style={{ marginTop: 25 }}>
-            <button style={buttonStyle} onClick={() => exportToExcel()}>
+          <div style={{ marginTop: 20, textAlign: "center" }}>
+            <button
+              style={{ ...buttonStyle, maxWidth: 250 }}
+              onClick={exportarExcel}
+            >
               Exportar a Excel
             </button>
           </div>
