@@ -186,19 +186,18 @@ export default function Reports() {
         src="/logo.png"
         alt="Logo"
         style={{
-          position: "fixed",
-          top: 40,
-          right: 40,
-          height: 180, // más grande
+          position: "absolute",
+          top: "10px",
+          right: "-450px",
+          height: "350px",
           objectFit: "contain",
-          zIndex: 900,
         }}
       />
 
       {/* Caja blanca principal */}
       <div
         style={{
-          backgroundColor: "#f9f9f9",
+          backgroundColor: "#white",
           minHeight: "100vh",
           padding: "40px 20px",
           boxSizing: "border-box",
