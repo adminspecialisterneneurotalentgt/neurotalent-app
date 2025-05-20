@@ -152,7 +152,7 @@ export default function Results() {
     fontWeight: "bold",
     marginBottom: 6,
     display: "block",
-    color: "#262d7d",
+    color: "#black",
   };
 
   const inputStyle: React.CSSProperties = {
@@ -252,6 +252,7 @@ export default function Results() {
         Resultados de Evaluaciones
       </h2>
 
+      {/* Logo */}
       <div style={{ position: "relative" }}>
         <img
           src="/logo.png"
@@ -259,8 +260,8 @@ export default function Results() {
           style={{
             position: "absolute",
             top: "10px",
-            right: "-600px", // Más a la derecha
-            height: "350px", // Más grande
+            right: "-450px",
+            height: "350px",
             objectFit: "contain",
           }}
         />
