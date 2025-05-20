@@ -3,15 +3,14 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 const pageStyle: React.CSSProperties = {
-  backgroundColor: "#f0f0f0", // gris claro
+  backgroundColor: "#fff",
   minHeight: "100vh",
-  padding: "40px 20px",
+  padding: "40px 60px",
   color: "#262d7d",
-  maxWidth: "1000px", // ancho máximo solicitado
+  maxWidth: "1400px",
   margin: "0 auto",
   boxSizing: "border-box",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-  position: "relative",
 };
 
 const containerStyle: React.CSSProperties = {
@@ -38,6 +37,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 16,
   boxSizing: "border-box",
   color: "#333",
+  backgroundColor: "#f2f4f8", // gris claro
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -96,7 +96,7 @@ const logoStyle: React.CSSProperties = {
   position: "fixed",
   top: 50,
   right: 60,
-  height: 350, // mismo tamaño que evaluaciones
+  height: 150,
   objectFit: "contain",
   zIndex: 10,
 };
@@ -236,34 +236,26 @@ export default function Results() {
   return (
     <div style={pageStyle}>
       {/* Botón regresar */}
-      <button
-        onClick={handleRegresar}
+      <a
         style={{
+          ...labelStyle,
+          cursor: "pointer",
+          marginBottom: 20,
           position: "fixed",
           top: 20,
           left: 20,
           zIndex: 1000,
-          background: "none",
-          border: "none",
           color: "#262d7d",
           fontWeight: "bold",
-          fontSize: 16,
-          cursor: "pointer",
           textDecoration: "underline",
         }}
+        onClick={handleRegresar}
       >
         ← Regresar a Dashboard
-      </button>
+      </a>
 
       {/* Título */}
-      <h1
-        style={{
-          ...labelStyle,
-          fontSize: 28,
-          fontWeight: "bold",
-          marginTop: 60,
-        }}
-      >
+      <h1 style={{ ...labelStyle, fontSize: 28, fontWeight: "bold" }}>
         Resultados de Evaluaciones
       </h1>
 
