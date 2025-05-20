@@ -5,13 +5,12 @@ import { saveAs } from "file-saver";
 const pageStyle: React.CSSProperties = {
   backgroundColor: "#fff",
   minHeight: "100vh",
-  padding: "40px 20px 20px", // menos padding horizontal
+  padding: "40px 60px",
   color: "#262d7d",
-  maxWidth: "1000px", // igual que Evaluations
+  maxWidth: "1400px",
   margin: "0 auto",
   boxSizing: "border-box",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-  position: "relative",
 };
 
 const containerStyle: React.CSSProperties = {
@@ -21,6 +20,7 @@ const containerStyle: React.CSSProperties = {
   boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
   border: "2px solid #262d7d",
   marginBottom: "30px",
+  position: "relative", // <-- para que contenga el logo absoluto
 };
 
 const labelStyle: React.CSSProperties = {
@@ -38,7 +38,6 @@ const inputStyle: React.CSSProperties = {
   fontSize: 16,
   boxSizing: "border-box",
   color: "#333",
-  backgroundColor: "#f0f0f0", // gris claro dentro de inputs
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -93,27 +92,18 @@ const actionButtonStyle: React.CSSProperties = {
   fontWeight: "bold",
 };
 
-const logoStyle: React.CSSProperties = {
-  position: "fixed",
-  top: 20, // igual que Evaluations
-  right: 20, // igual que Evaluations
-  height: 150, // mismo tamaño
-  objectFit: "contain",
-  zIndex: 10,
-};
-
-interface Resultado {
-  id: number;
-  nombre: string;
-  evaluacion: string;
-  puntaje: number;
-  fecha: string;
-  archivoPDF?: File;
-  comentarios: string;
-}
-
 export default function Results() {
-  const [resultados, setResultados] = useState<Resultado[]>([]);
+  const [resultados, setResultados] = useState<
+    {
+      id: number;
+      nombre: string;
+      evaluacion: string;
+      puntaje: number;
+      fecha: string;
+      archivoPDF?: File | null;
+      comentarios: string;
+    }[]
+  >([]);
   const [editId, setEditId] = useState<number | null>(null);
 
   const [nombre, setNombre] = useState("");
@@ -185,7 +175,7 @@ export default function Results() {
       );
       limpiarFormulario();
     } else {
-      const nuevo: Resultado = {
+      const nuevo = {
         id: Date.now(),
         nombre,
         evaluacion,
@@ -237,45 +227,48 @@ export default function Results() {
   return (
     <div style={pageStyle}>
       {/* Botón regresar */}
-      <button
-        onClick={handleRegresar}
+      <a
         style={{
+          ...labelStyle,
+          cursor: "pointer",
+          marginBottom: 20,
           position: "fixed",
           top: 20,
           left: 20,
-          background: "none",
-          border: "none",
-          color: "#262d7d",
-          fontWeight: "bold",
-          fontSize: 16,
-          cursor: "pointer",
-          textDecoration: "underline",
           zIndex: 1000,
         }}
+        onClick={handleRegresar}
       >
         ← Regresar a Dashboard
-      </button>
+      </a>
 
       {/* Título */}
-      <h1
-        style={{
-          ...labelStyle,
-          fontSize: 28,
-          fontWeight: "bold",
-          marginTop: 50,
-        }}
-      >
+      <h1 style={{ ...labelStyle, fontSize: 28, fontWeight: "bold" }}>
         Resultados de Evaluaciones
       </h1>
 
       {/* Contenedor formulario */}
       <div style={containerStyle}>
+        {/* Logo */}
+        <img
+          src="/logo.png"
+          alt="Logo Specialisterne"
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 20,
+            height: 150,
+            objectFit: "contain",
+            zIndex: 10,
+          }}
+        />
+
         <label style={labelStyle}>Nombre</label>
         <input
           type="text"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          style={inputStyle}
+          style={{ ...inputStyle, backgroundColor: "#ebecf0" }} // gris suave
           placeholder="Nombre del candidato"
         />
 
@@ -284,7 +277,7 @@ export default function Results() {
           type="text"
           value={evaluacion}
           onChange={(e) => setEvaluacion(e.target.value)}
-          style={inputStyle}
+          style={{ ...inputStyle, backgroundColor: "#ebecf0" }}
           placeholder="Nombre de la evaluación"
         />
 
@@ -293,7 +286,7 @@ export default function Results() {
           type="number"
           value={puntaje}
           onChange={(e) => setPuntaje(e.target.value)}
-          style={inputStyle}
+          style={{ ...inputStyle, backgroundColor: "#ebecf0" }}
           placeholder="0 - 100"
           min={0}
           max={100}
@@ -304,7 +297,7 @@ export default function Results() {
           type="date"
           value={fecha}
           onChange={(e) => setFecha(e.target.value)}
-          style={inputStyle}
+          style={{ ...inputStyle, backgroundColor: "#ebecf0" }}
         />
 
         <label style={labelStyle}>Archivo PDF</label>
@@ -320,7 +313,7 @@ export default function Results() {
         <textarea
           value={comentarios}
           onChange={(e) => setComentarios(e.target.value)}
-          style={textareaStyle}
+          style={{ ...textareaStyle, backgroundColor: "#ebecf0" }}
           placeholder="Comentarios o notas adicionales"
         />
 
@@ -407,9 +400,6 @@ export default function Results() {
           </button>
         </div>
       </div>
-
-      {/* Logo */}
-      <img src="/logo.png" alt="Logo Specialisterne" style={logoStyle} />
     </div>
   );
 }
