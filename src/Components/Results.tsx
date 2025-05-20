@@ -1,17 +1,7 @@
 import React, { useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
-const pageStyle: React.CSSProperties = {
-  backgroundColor: "#fff",
-  minHeight: "100vh",
-  padding: "40px 60px",
-  color: "#262d7d",
-  maxWidth: "1400px",
-  margin: "0 auto",
-  boxSizing: "border-box",
-  fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-};
 
 const containerStyle: React.CSSProperties = {
   backgroundColor: "white",
@@ -20,13 +10,17 @@ const containerStyle: React.CSSProperties = {
   boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
   border: "2px solid #262d7d",
   marginBottom: "30px",
-  position: "relative", // <-- para que contenga el logo absoluto
+  position: "relative",
+  maxWidth: 600,
+  marginLeft: "auto",
+  marginRight: "auto",
 };
 
 const labelStyle: React.CSSProperties = {
   fontWeight: "600",
   marginBottom: 6,
   display: "block",
+  color: "#262d7d",
 };
 
 const inputStyle: React.CSSProperties = {
@@ -38,6 +32,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 16,
   boxSizing: "border-box",
   color: "#333",
+  backgroundColor: "#ebecf0", // gris suave
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -92,7 +87,18 @@ const actionButtonStyle: React.CSSProperties = {
   fontWeight: "bold",
 };
 
+const logoStyle: React.CSSProperties = {
+  position: "absolute",
+  top: 10,
+  right: 20,
+  height: 150,
+  objectFit: "contain",
+  zIndex: 10,
+};
+
 export default function Results() {
+  const navigate = useNavigate();
+
   const [resultados, setResultados] = useState<
     {
       id: number;
@@ -222,184 +228,168 @@ export default function Results() {
     saveAs(blob, "ResultadosEvaluaciones.xlsx");
   };
 
-  const handleRegresar = () => window.history.back();
-
   return (
-    <div style={pageStyle}>
+    <div style={{ ...containerStyle, marginTop: 60 }}>
       {/* Botón regresar */}
-      <a
-        style={{
-          ...labelStyle,
-          cursor: "pointer",
-          marginBottom: 20,
-          position: "fixed",
-          top: 20,
-          left: 20,
-          zIndex: 1000,
-        }}
-        onClick={handleRegresar}
+      <div
+        style={{ position: "fixed", top: "20px", left: "20px", zIndex: 1000 }}
       >
-        ← Regresar a Dashboard
-      </a>
-
-      {/* Título */}
-      <h1 style={{ ...labelStyle, fontSize: 28, fontWeight: "bold" }}>
-        Resultados de Evaluaciones
-      </h1>
-
-      {/* Contenedor formulario */}
-      <div style={containerStyle}>
-        {/* Logo */}
-        <img
-          src="/logo.png"
-          alt="Logo Specialisterne"
+        <button
+          onClick={() => navigate("/dashboard")}
           style={{
-            position: "absolute",
-            top: 10,
-            right: 20,
-            height: 150,
-            objectFit: "contain",
-            zIndex: 10,
+            background: "none",
+            border: "none",
+            color: "#262d7d",
+            fontWeight: "bold",
+            fontSize: "16px",
+            cursor: "pointer",
+            textDecoration: "underline",
           }}
-        />
-
-        <label style={labelStyle}>Nombre</label>
-        <input
-          type="text"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          style={{ ...inputStyle, backgroundColor: "#ebecf0" }} // gris suave
-          placeholder="Nombre del candidato"
-        />
-
-        <label style={labelStyle}>Evaluación</label>
-        <input
-          type="text"
-          value={evaluacion}
-          onChange={(e) => setEvaluacion(e.target.value)}
-          style={{ ...inputStyle, backgroundColor: "#ebecf0" }}
-          placeholder="Nombre de la evaluación"
-        />
-
-        <label style={labelStyle}>Puntaje</label>
-        <input
-          type="number"
-          value={puntaje}
-          onChange={(e) => setPuntaje(e.target.value)}
-          style={{ ...inputStyle, backgroundColor: "#ebecf0" }}
-          placeholder="0 - 100"
-          min={0}
-          max={100}
-        />
-
-        <label style={labelStyle}>Fecha</label>
-        <input
-          type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
-          style={{ ...inputStyle, backgroundColor: "#ebecf0" }}
-        />
-
-        <label style={labelStyle}>Archivo PDF</label>
-        <input
-          id="archivoInput"
-          type="file"
-          accept="application/pdf"
-          onChange={handleArchivoChange}
-          style={{ marginBottom: 20 }}
-        />
-
-        <label style={labelStyle}>Comentarios adicionales</label>
-        <textarea
-          value={comentarios}
-          onChange={(e) => setComentarios(e.target.value)}
-          style={{ ...textareaStyle, backgroundColor: "#ebecf0" }}
-          placeholder="Comentarios o notas adicionales"
-        />
-
-        <button style={buttonStyle} onClick={handleAgregar}>
-          {editId !== null ? "Actualizar" : "Agregar"}
+        >
+          ← Regresar a Dashboard
         </button>
       </div>
 
-      {/* Tabla resultados */}
-      <div style={containerStyle}>
-        <table style={tableStyle}>
-          <thead>
+      {/* Logo */}
+      <img src="/logo.png" alt="Logo Specialisterne" style={logoStyle} />
+
+      {/* Título */}
+      <h2
+        style={{
+          textAlign: "center",
+          color: "#262d7d",
+          marginBottom: 20,
+          fontSize: "28px",
+        }}
+      >
+        Resultados de Evaluaciones
+      </h2>
+
+      {/* Formulario */}
+      <label style={labelStyle}>Nombre</label>
+      <input
+        type="text"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+        style={inputStyle}
+        placeholder="Nombre del candidato"
+      />
+
+      <label style={labelStyle}>Evaluación</label>
+      <input
+        type="text"
+        value={evaluacion}
+        onChange={(e) => setEvaluacion(e.target.value)}
+        style={inputStyle}
+        placeholder="Nombre de la evaluación"
+      />
+
+      <label style={labelStyle}>Puntaje</label>
+      <input
+        type="number"
+        value={puntaje}
+        onChange={(e) => setPuntaje(e.target.value)}
+        style={inputStyle}
+        placeholder="0 - 100"
+        min={0}
+        max={100}
+      />
+
+      <label style={labelStyle}>Fecha</label>
+      <input
+        type="date"
+        value={fecha}
+        onChange={(e) => setFecha(e.target.value)}
+        style={inputStyle}
+      />
+
+      <label style={labelStyle}>Archivo PDF</label>
+      <input
+        id="archivoInput"
+        type="file"
+        accept="application/pdf"
+        onChange={handleArchivoChange}
+        style={{ marginBottom: 20 }}
+      />
+
+      <label style={labelStyle}>Comentarios adicionales</label>
+      <textarea
+        value={comentarios}
+        onChange={(e) => setComentarios(e.target.value)}
+        style={textareaStyle}
+        placeholder="Comentarios o notas adicionales"
+      />
+
+      <button style={buttonStyle} onClick={handleAgregar}>
+        {editId !== null ? "Actualizar" : "Agregar"}
+      </button>
+
+      {/* Tabla */}
+      <table style={{ ...tableStyle, marginTop: 40 }}>
+        <thead>
+          <tr>
+            <th style={thStyle}>Nombre</th>
+            <th style={thStyle}>Evaluación</th>
+            <th style={thStyle}>Puntaje</th>
+            <th style={thStyle}>Fecha</th>
+            <th style={thStyle}>Archivo</th>
+            <th style={thStyle}>Comentarios</th>
+            <th style={thStyle}>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {resultados.length === 0 ? (
             <tr>
-              <th style={thStyle}>Nombre</th>
-              <th style={thStyle}>Evaluación</th>
-              <th style={thStyle}>Puntaje</th>
-              <th style={thStyle}>Fecha</th>
-              <th style={thStyle}>Archivo</th>
-              <th style={thStyle}>Comentarios</th>
-              <th style={thStyle}>Acciones</th>
+              <td
+                colSpan={7}
+                style={{
+                  ...tdStyle,
+                  textAlign: "center",
+                  fontStyle: "italic",
+                  color: "#888",
+                }}
+              >
+                No hay resultados registrados.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {resultados.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  style={{
-                    ...tdStyle,
-                    textAlign: "center",
-                    fontStyle: "italic",
-                    color: "#888",
-                  }}
-                >
-                  No hay resultados registrados.
+          ) : (
+            resultados.map((res) => (
+              <tr key={res.id}>
+                <td style={tdStyle}>{res.nombre}</td>
+                <td style={tdStyle}>{res.evaluacion}</td>
+                <td style={tdStyle}>{res.puntaje}</td>
+                <td style={tdStyle}>{res.fecha}</td>
+                <td style={tdStyle}>
+                  {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
+                </td>
+                <td style={tdStyle}>{res.comentarios}</td>
+                <td style={tdStyle}>
+                  <button
+                    style={{
+                      ...actionButtonStyle,
+                      backgroundColor: "#3498db",
+                      color: "white",
+                    }}
+                    onClick={() => handleEditar(res.id)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    style={{
+                      ...actionButtonStyle,
+                      backgroundColor: "#e74c3c",
+                      color: "white",
+                    }}
+                    onClick={() => handleEliminar(res.id)}
+                  >
+                    Eliminar
+                  </button>
                 </td>
               </tr>
-            ) : (
-              resultados.map((res) => (
-                <tr key={res.id}>
-                  <td style={tdStyle}>{res.nombre}</td>
-                  <td style={tdStyle}>{res.evaluacion}</td>
-                  <td style={tdStyle}>{res.puntaje}</td>
-                  <td style={tdStyle}>{res.fecha}</td>
-                  <td style={tdStyle}>
-                    {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
-                  </td>
-                  <td style={tdStyle}>{res.comentarios}</td>
-                  <td style={tdStyle}>
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        backgroundColor: "#3498db",
-                        color: "white",
-                      }}
-                      onClick={() => handleEditar(res.id)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        backgroundColor: "#e74c3c",
-                        color: "white",
-                      }}
-                      onClick={() => handleEliminar(res.id)}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-        {/* Botón exportar */}
-        <div style={{ marginTop: 20, textAlign: "center" }}>
-          <button
-            style={{ ...buttonStyle, maxWidth: 250 }}
-            onClick={exportarExcel}
-          >
-            Exportar a Excel
-          </button>
-        </div>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
