@@ -8,6 +8,7 @@ interface Report {
   evaluacion: string;
   fecha: string;
   puntaje: number;
+  archivoUrl?: string;
 }
 
 const thStyle: React.CSSProperties = {
@@ -16,6 +17,7 @@ const thStyle: React.CSSProperties = {
   padding: "12px 15px",
   textAlign: "left",
   borderBottom: "2px solid #1b2568",
+  cursor: "pointer",
 };
 
 const tdStyle: React.CSSProperties = {
@@ -39,14 +41,13 @@ const buttonStyle: React.CSSProperties = {
 };
 
 const inputStyle: React.CSSProperties = {
-  padding: "10px",
+  padding: 10,
   borderRadius: 6,
   border: "1px solid #ccc",
-  marginRight: 10,
   fontSize: 16,
   color: "#333",
   boxSizing: "border-box",
-  minWidth: 150,
+  width: "100%",
 };
 
 export default function Reports() {
@@ -69,7 +70,6 @@ export default function Reports() {
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
 
-  // carga de datos simulado (cambia con tu backend)
   const fetchReports = async () => {
     setLoading(true);
     setError(null);
@@ -100,15 +100,13 @@ export default function Reports() {
       data = data.filter((r) =>
         r.evaluacion.toLowerCase().includes(filterEvaluacion.toLowerCase())
       );
-    if (filterFecha)
-      data = data.filter((r) =>
-        r.fecha.toLowerCase().includes(filterFecha.toLowerCase())
-      );
+    if (filterFecha) data = data.filter((r) => r.fecha === filterFecha);
 
     if (sortField) {
       data.sort((a, b) => {
-        let valA = a[sortField];
-        let valB = b[sortField];
+        let valA = a[sortField] ?? "";
+        let valB = b[sortField] ?? "";
+
         if (typeof valA === "string" && typeof valB === "string") {
           valA = valA.toLowerCase();
           valB = valB.toLowerCase();
@@ -150,6 +148,7 @@ export default function Reports() {
       Evaluacion: r.evaluacion,
       Fecha: r.fecha,
       Puntaje: r.puntaje,
+      Archivo: r.archivoUrl || "Sin archivo",
     }));
     const ws = XLSX.utils.json_to_sheet(wsData);
     XLSX.utils.book_append_sheet(wb, ws, "Reportes");
@@ -205,41 +204,88 @@ export default function Reports() {
           Reporte General de Evaluaciones
         </h2>
 
-        {/* Filtros */}
+        {/* Filtros con etiquetas */}
         <div
           style={{
             marginBottom: 20,
             display: "flex",
             flexWrap: "wrap",
-            gap: 10,
+            gap: 20,
           }}
         >
-          <input
-            style={{ ...inputStyle, flex: "1 1 200px" }}
-            type="text"
-            placeholder="Filtrar por candidato"
-            value={filterCandidato}
-            onChange={(e) => setFilterCandidato(e.target.value)}
-            autoComplete="off"
-          />
-          <input
-            style={{ ...inputStyle, flex: "1 1 200px" }}
-            type="text"
-            placeholder="Filtrar por evaluación"
-            value={filterEvaluacion}
-            onChange={(e) => setFilterEvaluacion(e.target.value)}
-            autoComplete="off"
-          />
-          <input
-            style={{ ...inputStyle, flex: "1 1 200px" }}
-            type="date"
-            placeholder="Filtrar por fecha"
-            value={filterFecha}
-            onChange={(e) => setFilterFecha(e.target.value)}
-            autoComplete="off"
-          />
+          <div
+            style={{
+              flex: "1 1 200px",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <label
+              htmlFor="filterCandidato"
+              style={{ fontWeight: "bold", marginBottom: 6, color: "#262d7d" }}
+            >
+              Filtrar por candidato
+            </label>
+            <input
+              id="filterCandidato"
+              type="text"
+              placeholder="Filtrar por candidato"
+              value={filterCandidato}
+              onChange={(e) => setFilterCandidato(e.target.value)}
+              autoComplete="off"
+              style={inputStyle}
+            />
+          </div>
+
+          <div
+            style={{
+              flex: "1 1 200px",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <label
+              htmlFor="filterEvaluacion"
+              style={{ fontWeight: "bold", marginBottom: 6, color: "#262d7d" }}
+            >
+              Filtrar por evaluación
+            </label>
+            <input
+              id="filterEvaluacion"
+              type="text"
+              placeholder="Filtrar por evaluación"
+              value={filterEvaluacion}
+              onChange={(e) => setFilterEvaluacion(e.target.value)}
+              autoComplete="off"
+              style={inputStyle}
+            />
+          </div>
+
+          <div
+            style={{
+              flex: "1 1 200px",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <label
+              htmlFor="filterFecha"
+              style={{ fontWeight: "bold", marginBottom: 6, color: "#262d7d" }}
+            >
+              Filtrar por fecha
+            </label>
+            <input
+              id="filterFecha"
+              type="date"
+              value={filterFecha}
+              onChange={(e) => setFilterFecha(e.target.value)}
+              autoComplete="off"
+              style={inputStyle}
+            />
+          </div>
+
           <button
-            style={{ ...buttonStyle, flex: "0 0 auto", minWidth: 120 }}
+            style={{ ...buttonStyle, flex: "0 0 120px", alignSelf: "flex-end" }}
             onClick={() => fetchReports()}
             title="Refrescar reportes"
           >
@@ -253,7 +299,7 @@ export default function Reports() {
             style={{
               width: "100%",
               borderCollapse: "collapse",
-              minWidth: 600,
+              minWidth: 700,
             }}
           >
             <thead>
@@ -272,19 +318,20 @@ export default function Reports() {
                 <th style={thStyle} onClick={() => handleSort("puntaje")}>
                   Puntaje {sortField === "puntaje" ? (sortAsc ? "▲" : "▼") : ""}
                 </th>
+                <th style={thStyle}>Archivo</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: "center", padding: 20 }}>
+                  <td colSpan={5} style={{ textAlign: "center", padding: 20 }}>
                     Cargando reportes...
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     style={{ textAlign: "center", padding: 20, color: "red" }}
                   >
                     {error}
@@ -293,7 +340,7 @@ export default function Reports() {
               ) : paginatedReports.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     style={{ textAlign: "center", padding: 20, color: "#888" }}
                   >
                     No hay reportes que coincidan.
@@ -318,6 +365,20 @@ export default function Reports() {
                     <td style={tdStyle}>{r.evaluacion}</td>
                     <td style={tdStyle}>{r.fecha}</td>
                     <td style={tdStyle}>{r.puntaje}</td>
+                    <td style={tdStyle}>
+                      {r.archivoUrl ? (
+                        <a
+                          href={r.archivoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#262d7d", fontWeight: "bold" }}
+                        >
+                          Ver archivo
+                        </a>
+                      ) : (
+                        "Sin archivo"
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -335,7 +396,11 @@ export default function Reports() {
           }}
         >
           <button
-            style={{ ...buttonStyle, opacity: page === 1 ? 0.5 : 1 }}
+            style={{
+              ...buttonStyle,
+              opacity: page === 1 ? 0.5 : 1,
+              width: 120,
+            }}
             disabled={page === 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
@@ -345,7 +410,11 @@ export default function Reports() {
             Página {page} de {totalPages || 1}
           </span>
           <button
-            style={{ ...buttonStyle, opacity: page === totalPages ? 0.5 : 1 }}
+            style={{
+              ...buttonStyle,
+              opacity: page === totalPages ? 0.5 : 1,
+              width: 120,
+            }}
             disabled={page === totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           >
