@@ -5,12 +5,13 @@ import { saveAs } from "file-saver";
 const pageStyle: React.CSSProperties = {
   backgroundColor: "#fff",
   minHeight: "100vh",
-  padding: "40px 60px",
+  padding: "40px 20px 20px", // menos padding horizontal
   color: "#262d7d",
-  maxWidth: "1400px",
+  maxWidth: "1000px", // igual que Evaluations
   margin: "0 auto",
   boxSizing: "border-box",
   fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+  position: "relative",
 };
 
 const containerStyle: React.CSSProperties = {
@@ -37,7 +38,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 16,
   boxSizing: "border-box",
   color: "#333",
-  backgroundColor: "#f2f4f8", // gris claro
+  backgroundColor: "#f0f0f0", // gris claro dentro de inputs
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -94,9 +95,9 @@ const actionButtonStyle: React.CSSProperties = {
 
 const logoStyle: React.CSSProperties = {
   position: "fixed",
-  top: 50,
-  right: 60,
-  height: 150,
+  top: 20, // igual que Evaluations
+  right: 20, // igual que Evaluations
+  height: 150, // mismo tamaño
   objectFit: "contain",
   zIndex: 10,
 };
@@ -236,26 +237,34 @@ export default function Results() {
   return (
     <div style={pageStyle}>
       {/* Botón regresar */}
-      <a
+      <button
+        onClick={handleRegresar}
         style={{
-          ...labelStyle,
-          cursor: "pointer",
-          marginBottom: 20,
           position: "fixed",
           top: 20,
           left: 20,
-          zIndex: 1000,
+          background: "none",
+          border: "none",
           color: "#262d7d",
           fontWeight: "bold",
+          fontSize: 16,
+          cursor: "pointer",
           textDecoration: "underline",
+          zIndex: 1000,
         }}
-        onClick={handleRegresar}
       >
         ← Regresar a Dashboard
-      </a>
+      </button>
 
       {/* Título */}
-      <h1 style={{ ...labelStyle, fontSize: 28, fontWeight: "bold" }}>
+      <h1
+        style={{
+          ...labelStyle,
+          fontSize: 28,
+          fontWeight: "bold",
+          marginTop: 50,
+        }}
+      >
         Resultados de Evaluaciones
       </h1>
 
