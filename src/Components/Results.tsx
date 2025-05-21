@@ -6,16 +6,28 @@ import { saveAs } from "file-saver";
 type Resultado = {
   id: number;
   nombre: string;
-  evaluacion: string;
+  evaluacion: string | EvaluacionObj; // Puede ser string o objeto
   puntaje: number;
   fecha: string;
   archivoPDF?: string | null; // URL del archivo en backend
   comentarios: string;
 };
 
+type EvaluacionObj = {
+  titulo?: string;
+};
+
+function isEvaluacionObj(obj: any): obj is EvaluacionObj {
+  return obj && typeof obj === "object" && "titulo" in obj;
+}
+
 export default function Results() {
   const [resultados, setResultados] = useState<Resultado[]>([]);
   const [editId, setEditId] = useState<number | null>(null);
+
+  // Opciones para sugerencias
+  const [candidateOptions, setCandidateOptions] = useState<string[]>([]);
+  const [evaluationOptions, setEvaluationOptions] = useState<string[]>([]);
 
   // Campos del formulario
   const [nombre, setNombre] = useState("");
@@ -33,16 +45,33 @@ export default function Results() {
   const fin = inicio + resultadosPorPagina;
   const resultadosPagina = resultados.slice(inicio, fin);
 
-  // Cargar resultados del backend
-  useEffect(() => {
+  // Función para cargar resultados desde backend
+  const fetchResultados = () => {
     fetch("/api/results")
       .then((res) => res.json())
-      .then((data: Resultado[]) => {
-        setResultados(data);
+      .then((data) => setResultados(data))
+      .catch(() => setResultados([]));
+  };
+
+  // Cargar resultados y opciones al montar el componente
+  useEffect(() => {
+    fetchResultados();
+
+    fetch("/api/evaluations")
+      .then((res) => res.json())
+      .then((data: any[]) => {
+        const titles = data.map((e) => e.titulo);
+        setEvaluationOptions(titles);
       })
-      .catch((err) => {
-        console.error("Error cargando resultados:", err);
-      });
+      .catch(() => setEvaluationOptions([]));
+
+    fetch("/api/candidates")
+      .then((res) => res.json())
+      .then((data: any[]) => {
+        const names = data.map((c) => `${c.firstName} ${c.lastName}`);
+        setCandidateOptions(names);
+      })
+      .catch(() => setCandidateOptions([]));
   }, []);
 
   const handleArchivoChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +122,7 @@ export default function Results() {
     try {
       const formData = new FormData();
       formData.append("nombre", nombre);
-      formData.append("evaluacion", evaluacion);
+      formData.append("evaluacion", evaluacion.toString());
       formData.append("puntaje", puntajeNum.toString());
       formData.append("fecha", fecha);
       formData.append("comentarios", comentarios);
@@ -102,13 +131,11 @@ export default function Results() {
       let response: Response;
 
       if (editId !== null) {
-        // Actualizar
         response = await fetch(`/api/results/${editId}`, {
           method: "PUT",
           body: formData,
         });
       } else {
-        // Crear nuevo
         response = await fetch("/api/results", {
           method: "POST",
           body: formData,
@@ -117,15 +144,8 @@ export default function Results() {
 
       if (!response.ok) throw new Error("Error guardando resultado");
 
-      const savedResult: Resultado = await response.json();
-
-      if (editId !== null) {
-        setResultados((prev) =>
-          prev.map((r) => (r.id === editId ? savedResult : r))
-        );
-      } else {
-        setResultados((prev) => [...prev, savedResult]);
-      }
+      // Actualizar la lista con los datos frescos
+      fetchResultados();
 
       limpiarFormulario();
     } catch (error) {
@@ -141,7 +161,7 @@ export default function Results() {
           method: "DELETE",
         });
         if (!response.ok) throw new Error("Error eliminando resultado");
-        setResultados((prev) => prev.filter((r) => r.id !== id));
+        fetchResultados();
         if (editId === id) limpiarFormulario();
       } catch (error) {
         alert("Error al eliminar resultado");
@@ -153,20 +173,27 @@ export default function Results() {
   const handleEditar = (id: number) => {
     const res = resultados.find((r) => r.id === id);
     if (!res) return;
+
+    if (typeof res.evaluacion === "string") {
+      setEvaluacion(res.evaluacion);
+    } else if (isEvaluacionObj(res.evaluacion)) {
+      setEvaluacion(res.evaluacion.titulo || "");
+    } else {
+      setEvaluacion("");
+    }
+
     setEditId(id);
     setNombre(res.nombre);
-    setEvaluacion(res.evaluacion);
     setPuntaje(res.puntaje.toString());
     setFecha(res.fecha);
     setComentarios(res.comentarios);
     setArchivoPDF(null);
+
     const inputFile = document.getElementById(
       "archivoInput"
     ) as HTMLInputElement | null;
     if (inputFile) inputFile.value = "";
   };
-
-  // Aquí agregar tus estilos igual que en tu código original...
 
   return (
     <div
@@ -193,6 +220,21 @@ export default function Results() {
         >
           ← Regresar a Dashboard
         </button>
+      </div>
+
+      {/* Logo */}
+      <div style={{ position: "relative" }}>
+        <img
+          src="/logo.png"
+          alt="Logo"
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "-450px",
+            height: "350px",
+            objectFit: "contain",
+          }}
+        />
       </div>
 
       <h2
@@ -227,7 +269,7 @@ export default function Results() {
           Nombre
         </label>
         <input
-          type="text"
+          list="candidate-list"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           style={{
@@ -243,6 +285,11 @@ export default function Results() {
           }}
           placeholder="Nombre del candidato"
         />
+        <datalist id="candidate-list">
+          {candidateOptions.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
 
         <label
           style={{
@@ -255,7 +302,8 @@ export default function Results() {
           Evaluación
         </label>
         <input
-          type="text"
+          list="evaluation-list"
+          name="evaluacion"
           value={evaluacion}
           onChange={(e) => setEvaluacion(e.target.value)}
           style={{
@@ -271,6 +319,11 @@ export default function Results() {
           }}
           placeholder="Nombre de la evaluación"
         />
+        <datalist id="evaluation-list">
+          {evaluationOptions.map((title) => (
+            <option key={title} value={title} />
+          ))}
+        </datalist>
 
         <label
           style={{
@@ -535,7 +588,9 @@ export default function Results() {
                       verticalAlign: "top",
                     }}
                   >
-                    {res.evaluacion}
+                    {typeof res.evaluacion === "string"
+                      ? res.evaluacion
+                      : res.evaluacion.titulo || ""}
                   </td>
                   <td
                     style={{
@@ -555,7 +610,7 @@ export default function Results() {
                       verticalAlign: "top",
                     }}
                   >
-                    {res.fecha}
+                    {res.fecha ? res.fecha.substring(0, 10) : ""}
                   </td>
                   <td
                     style={{

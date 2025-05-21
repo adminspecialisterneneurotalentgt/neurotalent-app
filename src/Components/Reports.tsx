@@ -4,11 +4,19 @@ import { saveAs } from "file-saver";
 
 interface Report {
   id: number;
-  candidato: string;
-  evaluacion: string;
+  nombre: string; // del resultado
+  evaluacion: string | { titulo?: string } | null;
   fecha: string;
-  puntaje: number;
-  archivoUrl?: string;
+  puntaje: number | null;
+  archivoPDF?: string | null;
+  comentarios?: string;
+}
+
+interface Candidate {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fechaNacimiento?: string;
 }
 
 const thStyle: React.CSSProperties = {
@@ -52,11 +60,11 @@ const inputStyle: React.CSSProperties = {
 
 export default function Reports() {
   const [reports, setReports] = useState<Report[]>([]);
-  const [filteredReports, setFilteredReports] = useState<Report[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [filterCandidato, setFilterCandidato] = useState("");
+  const [filterNombre, setFilterNombre] = useState("");
   const [filterEvaluacion, setFilterEvaluacion] = useState("");
   const [filterFecha, setFilterFecha] = useState("");
 
@@ -65,15 +73,14 @@ export default function Reports() {
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
-  const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
 
   const fetchReports = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/reports");
-      if (!response.ok) throw new Error("Error al cargar los reportes");
-      const data: Report[] = await response.json();
+      const res = await fetch("/api/results");
+      if (!res.ok) throw new Error("Error al cargar resultados");
+      const data: Report[] = await res.json();
       setReports(data);
     } catch (e: any) {
       setError(e.message || "Error desconocido");
@@ -82,50 +89,87 @@ export default function Reports() {
     }
   };
 
+  const fetchCandidates = async () => {
+    try {
+      const res = await fetch("/api/candidates");
+      if (!res.ok) throw new Error("Error al cargar candidatos");
+      const data: Candidate[] = await res.json();
+      setCandidates(data);
+    } catch {
+      setCandidates([]);
+    }
+  };
+
   useEffect(() => {
     fetchReports();
+    fetchCandidates();
   }, []);
 
-  useEffect(() => {
-    let data = [...reports];
+  // TODOS los reportes + candidatos sin reportes (para que no falte nadie)
+  const mergedData: Report[] = [
+    ...reports, // TODOS los reportes sin cambios, repetidos incluidos
+    ...candidates
+      .filter(
+        (c) =>
+          !reports.some(
+            (r) =>
+              r.nombre.toLowerCase() ===
+              `${c.firstName} ${c.lastName}`.toLowerCase()
+          )
+      )
+      .map((c) => ({
+        id: -c.id,
+        nombre: `${c.firstName} ${c.lastName}`,
+        evaluacion: null,
+        fecha: c.fechaNacimiento || "",
+        puntaje: null,
+        archivoPDF: null,
+        comentarios: "",
+      })),
+  ];
 
-    if (filterCandidato)
-      data = data.filter((r) =>
-        r.candidato.toLowerCase().includes(filterCandidato.toLowerCase())
-      );
-    if (filterEvaluacion)
-      data = data.filter((r) =>
-        r.evaluacion.toLowerCase().includes(filterEvaluacion.toLowerCase())
-      );
-    if (filterFecha) data = data.filter((r) => r.fecha === filterFecha);
+  // Filtros sobre TODOS los reportes
+  let filteredData = [...mergedData];
 
-    if (sortField) {
-      data.sort((a, b) => {
-        let valA = a[sortField] ?? "";
-        let valB = b[sortField] ?? "";
+  if (filterNombre)
+    filteredData = filteredData.filter((r) =>
+      r.nombre.toLowerCase().includes(filterNombre.toLowerCase())
+    );
 
-        if (typeof valA === "string" && typeof valB === "string") {
-          valA = valA.toLowerCase();
-          valB = valB.toLowerCase();
-        }
-        if (valA < valB) return sortAsc ? -1 : 1;
-        if (valA > valB) return sortAsc ? 1 : -1;
-        return 0;
-      });
-    }
+  if (filterEvaluacion)
+    filteredData = filteredData.filter((r) =>
+      getEvaluacionDisplay(r.evaluacion)
+        .toLowerCase()
+        .includes(filterEvaluacion.toLowerCase())
+    );
 
-    setFilteredReports(data);
-    setPage(1);
-  }, [
-    reports,
-    filterCandidato,
-    filterEvaluacion,
-    filterFecha,
-    sortField,
-    sortAsc,
-  ]);
+  if (filterFecha)
+    filteredData = filteredData.filter((r) => r.fecha === filterFecha);
 
-  const paginatedReports = filteredReports.slice(
+  // Ordenar
+  if (sortField) {
+    filteredData.sort((a, b) => {
+      let valA: any = a[sortField] ?? "";
+      let valB: any = b[sortField] ?? "";
+
+      if (sortField === "evaluacion") {
+        valA = getEvaluacionDisplay(a.evaluacion).toLowerCase();
+        valB = getEvaluacionDisplay(b.evaluacion).toLowerCase();
+      }
+
+      if (typeof valA === "string" && typeof valB === "string") {
+        valA = valA.toLowerCase();
+        valB = valB.toLowerCase();
+      }
+
+      if (valA < valB) return sortAsc ? -1 : 1;
+      if (valA > valB) return sortAsc ? 1 : -1;
+      return 0;
+    });
+  }
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedReports = filteredData.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
@@ -140,12 +184,12 @@ export default function Reports() {
 
   const exportarExcel = () => {
     const wb = XLSX.utils.book_new();
-    const wsData = filteredReports.map((r) => ({
-      Candidato: r.candidato,
-      Evaluacion: r.evaluacion,
+    const wsData = filteredData.map((r) => ({
+      Nombre: r.nombre,
+      Evaluacion: getEvaluacionDisplay(r.evaluacion),
       Fecha: r.fecha,
-      Puntaje: r.puntaje,
-      Archivo: r.archivoUrl || "Sin archivo",
+      Puntaje: r.puntaje ?? "Sin puntaje",
+      Archivo: r.archivoPDF || "Sin archivo",
     }));
     const ws = XLSX.utils.json_to_sheet(wsData);
     XLSX.utils.book_append_sheet(wb, ws, "Reportes");
@@ -181,7 +225,7 @@ export default function Reports() {
         </button>
       </div>
 
-      {/* Imagen fuera de la caja, posicionada */}
+      {/* Logo fijo */}
       <img
         src="/logo.png"
         alt="Logo"
@@ -189,16 +233,16 @@ export default function Reports() {
           position: "fixed",
           top: 40,
           right: 40,
-          height: 350, // más grande
+          height: 350,
           objectFit: "contain",
           zIndex: 900,
         }}
       />
 
-      {/* Caja blanca principal */}
+      {/* Contenedor principal */}
       <div
         style={{
-          backgroundColor: "#white",
+          backgroundColor: "white",
           minHeight: "100vh",
           padding: "40px 20px",
           boxSizing: "border-box",
@@ -217,7 +261,6 @@ export default function Reports() {
             position: "relative",
           }}
         >
-          {/* Título */}
           <h2
             style={{
               color: "#262d7d",
@@ -230,7 +273,7 @@ export default function Reports() {
             Reporte General de Evaluaciones
           </h2>
 
-          {/* Filtros con labels */}
+          {/* Filtros */}
           <div
             style={{
               marginBottom: 20,
@@ -247,21 +290,21 @@ export default function Reports() {
               }}
             >
               <label
-                htmlFor="filterCandidato"
+                htmlFor="filterNombre"
                 style={{
                   fontWeight: "bold",
                   marginBottom: 6,
                   color: "#262d7d",
                 }}
               >
-                Filtrar por candidato
+                Filtrar por nombre
               </label>
               <input
-                id="filterCandidato"
+                id="filterNombre"
                 type="text"
-                placeholder="Filtrar por candidato"
-                value={filterCandidato}
-                onChange={(e) => setFilterCandidato(e.target.value)}
+                placeholder="Filtrar por nombre"
+                value={filterNombre}
+                onChange={(e) => setFilterNombre(e.target.value)}
                 autoComplete="off"
                 style={inputStyle}
               />
@@ -328,14 +371,17 @@ export default function Reports() {
                 flex: "0 0 120px",
                 alignSelf: "flex-end",
               }}
-              onClick={() => fetchReports()}
+              onClick={() => {
+                fetchReports();
+                fetchCandidates();
+              }}
               title="Refrescar reportes"
             >
               Refrescar
             </button>
           </div>
 
-          {/* Tabla con scroll */}
+          {/* Tabla */}
           <div style={{ overflowX: "auto" }}>
             <table
               style={{
@@ -346,9 +392,8 @@ export default function Reports() {
             >
               <thead>
                 <tr>
-                  <th style={thStyle} onClick={() => handleSort("candidato")}>
-                    Candidato{" "}
-                    {sortField === "candidato" ? (sortAsc ? "▲" : "▼") : ""}
+                  <th style={thStyle} onClick={() => handleSort("nombre")}>
+                    Nombre {sortField === "nombre" ? (sortAsc ? "▲" : "▼") : ""}
                   </th>
                   <th style={thStyle} onClick={() => handleSort("evaluacion")}>
                     Evaluación{" "}
@@ -411,14 +456,20 @@ export default function Reports() {
                         (e.currentTarget.style.backgroundColor = "transparent")
                       }
                     >
-                      <td style={tdStyle}>{r.candidato}</td>
-                      <td style={tdStyle}>{r.evaluacion}</td>
-                      <td style={tdStyle}>{r.fecha}</td>
-                      <td style={tdStyle}>{r.puntaje}</td>
+                      <td style={tdStyle}>{r.nombre}</td>
                       <td style={tdStyle}>
-                        {r.archivoUrl ? (
+                        {getEvaluacionDisplay(r.evaluacion)}
+                      </td>
+                      <td style={tdStyle}>
+                        {r.fecha ? r.fecha.substring(0, 10) : ""}
+                      </td>
+                      <td style={tdStyle}>
+                        {r.puntaje !== null ? r.puntaje : "Sin puntaje"}
+                      </td>
+                      <td style={tdStyle}>
+                        {r.archivoPDF ? (
                           <a
-                            href={r.archivoUrl}
+                            href={r.archivoPDF}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ color: "#262d7d", fontWeight: "bold" }}
@@ -485,4 +536,13 @@ export default function Reports() {
       </div>
     </>
   );
+
+  function getEvaluacionDisplay(
+    evaluacion: string | { titulo?: string } | null | undefined
+  ): string {
+    if (!evaluacion) return "Sin evaluación";
+    if (typeof evaluacion === "string") return evaluacion;
+    if ("titulo" in evaluacion && evaluacion.titulo) return evaluacion.titulo;
+    return "Sin evaluación";
+  }
 }

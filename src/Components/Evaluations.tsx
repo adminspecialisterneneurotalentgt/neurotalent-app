@@ -54,11 +54,9 @@ export default function Evaluations() {
   const canDelete = role === "admin";
   const canExport = role === "admin";
 
-  // Paginacion
   const [paginaActual, setPaginaActual] = useState(1);
   const resultadosPorPagina = 5;
 
-  // Estados
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [form, setForm] = useState<Omit<Evaluation, "id" | "documentoUrl">>({
     titulo: "",
@@ -77,15 +75,10 @@ export default function Evaluations() {
     fecha: "",
   });
 
-  // Lista candidatos para sugerencias
   const [candidateOptions, setCandidateOptions] = useState<string[]>([]);
 
-  // Carga inicial
   useEffect(() => {
-    // Simulacion de fetch evaluaciones (reemplazar por API real)
     fetchEvaluations();
-
-    // Cargar candidatos para sugerencias
     fetch("/api/candidates")
       .then((res) => res.json())
       .then((data) => {
@@ -96,28 +89,24 @@ export default function Evaluations() {
   }, []);
 
   const fetchEvaluations = () => {
-    // Aquí debes implementar fetch real, esto es un mock
-    // Puedes usar fetch('/api/evaluations').then(...);
-    setEvaluations([
-      {
-        id: 1,
-        titulo: "Prueba",
-        descripcion: "Descripción prueba",
-        candidato: "prueba",
-        evaluador: "prueba",
-        fecha: "2025-05-06",
-        tipo: "Lógica",
-        estado: "En proceso",
-        documentoUrl: undefined,
-      },
-    ]);
+    fetch("/api/evaluations")
+      .then((res) => res.json())
+      .then((data: Evaluation[]) => setEvaluations(data))
+      .catch(() => setEvaluations([]));
   };
 
-  // Paginacion calculos
   const totalPaginas = Math.ceil(evaluations.length / resultadosPorPagina);
   const inicio = (paginaActual - 1) * resultadosPorPagina;
   const fin = inicio + resultadosPorPagina;
-  const resultadosPagina = evaluations.slice(inicio, fin);
+
+  const resultadosPagina = evaluations
+    .filter(
+      (ev) =>
+        (!filtros.tipo || ev.tipo === filtros.tipo) &&
+        (!filtros.estado || ev.estado === filtros.estado) &&
+        (!filtros.fecha || ev.fecha === filtros.fecha)
+    )
+    .slice(inicio, fin);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -138,7 +127,7 @@ export default function Evaluations() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canEdit) return;
 
@@ -158,35 +147,63 @@ export default function Evaluations() {
       return;
     }
 
-    const newEvaluation: Evaluation = {
-      id: Date.now(),
-      ...form,
-      documentoUrl: documento ? URL.createObjectURL(documento) : undefined,
-    };
+    try {
+      const formData = new FormData();
+      formData.append("titulo", titulo);
+      formData.append("descripcion", descripcion);
+      formData.append("candidato", candidato);
+      formData.append("evaluador", evaluador);
+      formData.append("fecha", fecha);
+      formData.append("tipo", tipo);
+      formData.append("estado", estado);
 
-    if (editId !== null) {
-      setEvaluations((prev) =>
-        prev.map((ev) =>
-          ev.id === editId ? { ...newEvaluation, id: ev.id } : ev
-        )
-      );
-      setEditId(null);
-    } else {
-      setEvaluations([...evaluations, newEvaluation]);
+      if (documento) {
+        formData.append("documento", documento);
+      }
+
+      let response: Response;
+
+      if (editId !== null) {
+        response = await fetch(`/api/evaluations/${editId}`, {
+          method: "PUT",
+          body: formData,
+        });
+      } else {
+        response = await fetch("/api/evaluations", {
+          method: "POST",
+          body: formData,
+        });
+      }
+
+      if (!response.ok) throw new Error("Error guardando evaluación");
+
+      const savedEvaluation = await response.json();
+
+      if (editId !== null) {
+        setEvaluations((prev) =>
+          prev.map((ev) => (ev.id === editId ? savedEvaluation : ev))
+        );
+        setEditId(null);
+      } else {
+        setEvaluations((prev) => [...prev, savedEvaluation]);
+      }
+
+      setForm({
+        titulo: "",
+        descripcion: "",
+        candidato: "",
+        evaluador: "",
+        fecha: "",
+        tipo: "",
+        estado: "Pendiente",
+      });
+      setDocumento(null);
+      const inputFile = document.getElementById("docInput") as HTMLInputElement;
+      if (inputFile) inputFile.value = "";
+    } catch (error) {
+      alert("Error al guardar evaluación");
+      console.error(error);
     }
-
-    setForm({
-      titulo: "",
-      descripcion: "",
-      candidato: "",
-      evaluador: "",
-      fecha: "",
-      tipo: "",
-      estado: "Pendiente",
-    });
-    setDocumento(null);
-    const inputFile = document.getElementById("docInput") as HTMLInputElement;
-    if (inputFile) inputFile.value = "";
   };
 
   const handleEdit = (id: number) => {
@@ -209,10 +226,19 @@ export default function Evaluations() {
     }
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (!canDelete) return;
     if (confirm("¿Eliminar esta evaluación?")) {
-      setEvaluations((prev) => prev.filter((ev) => ev.id !== id));
+      try {
+        const response = await fetch(`/api/evaluations/${id}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) throw new Error("Error eliminando evaluación");
+        setEvaluations((prev) => prev.filter((ev) => ev.id !== id));
+      } catch (error) {
+        alert("Error al eliminar evaluación");
+        console.error(error);
+      }
     }
   };
 
@@ -242,7 +268,7 @@ export default function Evaluations() {
   return (
     <div
       style={{
-        maxWidth: "1000px",
+        maxWidth: "1200px",
         margin: "0 auto",
         marginBottom: "10px",
         position: "relative",
@@ -492,37 +518,42 @@ export default function Evaluations() {
       <table
         style={{
           width: "100%",
+          maxWidth: "2000px",
+          margin: "0 auto",
           borderCollapse: "collapse",
           backgroundColor: "white",
         }}
       >
         <thead>
           <tr>
-            <th style={thStyle}>Título</th>
-            <th style={thStyle}>Candidato</th>
-            <th style={thStyle}>Evaluador</th>
-            <th style={thStyle}>Tipo</th>
-            <th style={thStyle}>Fecha</th>
-            <th style={thStyle}>Estado</th>
-            <th style={thStyle}>Documento</th>
-            <th style={thStyle}>Acciones</th>
+            <th style={{ ...thStyle, width: "180px" }}>Título</th>
+            <th style={{ ...thStyle, width: "200px" }}>Candidato</th>
+            <th style={{ ...thStyle, width: "180px" }}>Evaluador</th>
+            <th style={{ ...thStyle, width: "140px" }}>Tipo</th>
+            <th style={{ ...thStyle, width: "140px" }}>Fecha</th>
+            <th style={{ ...thStyle, width: "130px" }}>Estado</th>
+            <th style={{ ...thStyle, width: "140px" }}>Documento</th>
+            <th style={{ ...thStyle, width: "130px" }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {resultadosPagina
-            .filter(
-              (ev) =>
-                (!filtros.tipo || ev.tipo === filtros.tipo) &&
-                (!filtros.estado || ev.estado === filtros.estado) &&
-                (!filtros.fecha || ev.fecha === filtros.fecha)
-            )
-            .map((ev) => (
+          {resultadosPagina.length === 0 ? (
+            <tr>
+              <td
+                colSpan={8}
+                style={{ textAlign: "center", padding: "20px", color: "#888" }}
+              >
+                No hay evaluaciones registradas.
+              </td>
+            </tr>
+          ) : (
+            resultadosPagina.map((ev) => (
               <tr key={ev.id}>
                 <td style={tdStyle}>{ev.titulo}</td>
                 <td style={tdStyle}>{ev.candidato}</td>
                 <td style={tdStyle}>{ev.evaluador}</td>
                 <td style={tdStyle}>{ev.tipo}</td>
-                <td style={tdStyle}>{ev.fecha}</td>
+                <td style={tdStyle}>{ev.fecha.split("T")[0]}</td>
                 <td
                   style={{
                     ...tdStyle,
@@ -538,7 +569,6 @@ export default function Evaluations() {
                       href={ev.documentoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: "#262d7d", textDecoration: "underline" }}
                     >
                       Ver PDF
                     </a>
@@ -583,16 +613,7 @@ export default function Evaluations() {
                   </div>
                 </td>
               </tr>
-            ))}
-          {evaluations.length === 0 && (
-            <tr>
-              <td
-                colSpan={8}
-                style={{ textAlign: "center", padding: "20px", color: "#888" }}
-              >
-                No hay evaluaciones registradas.
-              </td>
-            </tr>
+            ))
           )}
         </tbody>
       </table>
@@ -602,7 +623,9 @@ export default function Evaluations() {
           style={{
             display: "flex",
             justifyContent: "center",
-            marginBottom: "30px",
+            alignItems: "center",
+            gap: "20px",
+            marginTop: "30px",
           }}
         >
           <button
