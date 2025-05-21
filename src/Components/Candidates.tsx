@@ -58,23 +58,27 @@ export default function Candidates() {
     const date = new Date(dateStr);
     return date.toISOString().slice(0, 10); // yyyy-MM-dd
   };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const handleAddOrUpdate = async () => {
-    console.log("handleAddOrUpdate invoked"); // <-- esto ayuda a saber si se llama la función
-    if (!firstName || !lastName || !email) {
-      return alert("Completa todos los campos");
-    }
     if (!firstName || !lastName || !email)
       return alert("Completa todos los campos");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) return alert("Correo inválido");
-
+    const fechaISO = formatDateISO(fechaNacimiento);
     const formData = new FormData();
     formData.append("firstName", firstName);
     formData.append("lastName", lastName);
     formData.append("email", email);
     formData.append("telefono", telefono);
-    const fechaISO = formatDateISO(fechaNacimiento);
     formData.append("fechaNacimiento", fechaISO);
     formData.append("direccion", direccion);
     formData.append("interes", interes);
@@ -501,7 +505,7 @@ export default function Candidates() {
                   <td style={tdStyle}>{c.lastName}</td>
                   <td style={tdStyle}>{c.email}</td>
                   <td style={tdStyle}>{c.telefono}</td>
-                  <td style={tdStyle}>{c.fechaNacimiento}</td>
+                  <td style={tdStyle}>{formatDate(c.fechaNacimiento)}</td>
                   <td style={tdStyle}>{c.direccion}</td>
                   <td style={tdStyle}>{c.interes}</td>
                   <td style={tdStyle}>{c.disponible ? "Sí" : "No"}</td>
