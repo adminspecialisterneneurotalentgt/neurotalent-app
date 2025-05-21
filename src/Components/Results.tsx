@@ -379,31 +379,56 @@ export default function Results() {
                   <td style={tdStyle}>{res.evaluacion}</td>
                   <td style={tdStyle}>{res.puntaje}</td>
                   <td style={tdStyle}>{res.fecha}</td>
-                  <td style={tdStyle}>
-                    {res.archivoPDF ? res.archivoPDF.name : "Sin archivo"}
-                  </td>
+
+                  {/* Columna Comentarios primero */}
                   <td style={tdStyle}>{res.comentarios}</td>
+
+                  {/* Columna Archivo como enlace */}
                   <td style={tdStyle}>
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        backgroundColor: "#3498db",
-                        color: "white",
-                      }}
-                      onClick={() => handleEditar(res.id)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      style={{
-                        ...actionButtonStyle,
-                        backgroundColor: "#e74c3c",
-                        color: "white",
-                      }}
-                      onClick={() => handleEliminar(res.id)}
-                    >
-                      Eliminar
-                    </button>
+                    {res.archivoPDF ? (
+                      <a
+                        href={URL.createObjectURL(res.archivoPDF)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "#262d7d",
+                          fontWeight: "bold",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        {res.archivoPDF.name}
+                      </a>
+                    ) : (
+                      "Sin archivo"
+                    )}
+                  </td>
+
+                  {/* Acciones en línea */}
+                  <td style={tdStyle}>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <button
+                        style={{
+                          ...actionButtonStyle,
+                          backgroundColor: "#3498db",
+                          color: "white",
+                          flex: "1",
+                        }}
+                        onClick={() => handleEditar(res.id)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        style={{
+                          ...actionButtonStyle,
+                          backgroundColor: "#e74c3c",
+                          color: "white",
+                          flex: "1",
+                        }}
+                        onClick={() => handleEliminar(res.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

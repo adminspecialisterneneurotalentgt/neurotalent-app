@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -14,21 +14,6 @@ interface Evaluation {
   estado: string;
   documentoUrl?: string;
 }
-
-const thStyle: React.CSSProperties = {
-  backgroundColor: "#262d7d",
-  color: "white",
-  padding: "12px",
-  textAlign: "left",
-  whiteSpace: "nowrap",
-  border: "1px solid #ccc",
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: "10px",
-  verticalAlign: "top",
-  border: "1px solid #ccc",
-};
 
 const inputStyle: React.CSSProperties = {
   padding: "10px",
@@ -47,6 +32,21 @@ const buttonStyle: React.CSSProperties = {
   width: "100%",
 };
 
+const thStyle: React.CSSProperties = {
+  backgroundColor: "#262d7d",
+  color: "white",
+  padding: "12px",
+  textAlign: "left",
+  whiteSpace: "nowrap",
+  border: "1px solid #ccc",
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "10px",
+  verticalAlign: "top",
+  border: "1px solid #ccc",
+};
+
 export default function Evaluations() {
   const navigate = useNavigate();
   const role = "admin";
@@ -54,10 +54,11 @@ export default function Evaluations() {
   const canDelete = role === "admin";
   const canExport = role === "admin";
 
-  // Estados paginación
+  // Paginacion
   const [paginaActual, setPaginaActual] = useState(1);
   const resultadosPorPagina = 5;
 
+  // Estados
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [form, setForm] = useState<Omit<Evaluation, "id" | "documentoUrl">>({
     titulo: "",
@@ -76,7 +77,43 @@ export default function Evaluations() {
     fecha: "",
   });
 
-  // Cálculos para paginación
+  // Lista candidatos para sugerencias
+  const [candidateOptions, setCandidateOptions] = useState<string[]>([]);
+
+  // Carga inicial
+  useEffect(() => {
+    // Simulacion de fetch evaluaciones (reemplazar por API real)
+    fetchEvaluations();
+
+    // Cargar candidatos para sugerencias
+    fetch("/api/candidates")
+      .then((res) => res.json())
+      .then((data) => {
+        const nombres = data.map((c: any) => `${c.firstName} ${c.lastName}`);
+        setCandidateOptions(nombres);
+      })
+      .catch(() => setCandidateOptions([]));
+  }, []);
+
+  const fetchEvaluations = () => {
+    // Aquí debes implementar fetch real, esto es un mock
+    // Puedes usar fetch('/api/evaluations').then(...);
+    setEvaluations([
+      {
+        id: 1,
+        titulo: "Prueba",
+        descripcion: "Descripción prueba",
+        candidato: "prueba",
+        evaluador: "prueba",
+        fecha: "2025-05-06",
+        tipo: "Lógica",
+        estado: "En proceso",
+        documentoUrl: undefined,
+      },
+    ]);
+  };
+
+  // Paginacion calculos
   const totalPaginas = Math.ceil(evaluations.length / resultadosPorPagina);
   const inicio = (paginaActual - 1) * resultadosPorPagina;
   const fin = inicio + resultadosPorPagina;
@@ -286,11 +323,17 @@ export default function Evaluations() {
             Candidato asignado
           </label>
           <input
+            list="candidate-list"
             name="candidato"
             value={form.candidato}
             onChange={handleChange}
             style={inputStyle}
           />
+          <datalist id="candidate-list">
+            {candidateOptions.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
 
           <label style={{ fontWeight: "bold", marginTop: "10px" }}>
             Evaluador asignado
@@ -374,7 +417,7 @@ export default function Evaluations() {
         </div>
       </form>
 
-      {/* Búsqueda por filtros */}
+      {/* Filtros */}
       <h3
         style={{
           textAlign: "center",
@@ -504,20 +547,40 @@ export default function Evaluations() {
                   )}
                 </td>
                 <td style={tdStyle}>
-                  {canEdit && (
-                    <button onClick={() => handleEdit(ev.id)}>Editar</button>
-                  )}
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDelete(ev.id)}
-                      style={{
-                        color: "red",
-                        marginLeft: canEdit ? "10px" : "0",
-                      }}
-                    >
-                      Eliminar
-                    </button>
-                  )}
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {canEdit && (
+                      <button
+                        onClick={() => handleEdit(ev.id)}
+                        style={{
+                          backgroundColor: "#3498db",
+                          color: "white",
+                          border: "none",
+                          padding: "6px 12px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          width: "80px",
+                        }}
+                      >
+                        Editar
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(ev.id)}
+                        style={{
+                          backgroundColor: "#e74c3c",
+                          color: "white",
+                          border: "none",
+                          padding: "6px 12px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          width: "80px",
+                        }}
+                      >
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

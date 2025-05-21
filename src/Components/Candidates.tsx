@@ -140,8 +140,10 @@ export default function Candidates() {
     setMensaje("");
   };
 
+  // Función handleDelete con confirm dentro
   const handleDelete = async (id: number) => {
     if (!confirm("¿Eliminar este candidato?")) return;
+
     try {
       const res = await fetch(`/api/candidates/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
@@ -530,24 +532,29 @@ export default function Candidates() {
                   </td>
 
                   <td style={tdStyle}>
-                    <button
-                      onClick={() =>
-                        confirm("¿Deseas editar este candidato?") &&
-                        handleEdit(c.id)
-                      }
-                      style={editButtonStyle}
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        justifyContent: "center",
+                      }}
                     >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() =>
-                        confirm("¿Eliminar definitivamente este candidato?") &&
-                        handleDelete(c.id)
-                      }
-                      style={deleteButtonStyle}
-                    >
-                      Eliminar
-                    </button>
+                      <button
+                        onClick={() =>
+                          confirm("¿Deseas editar este candidato?") &&
+                          handleEdit(c.id)
+                        }
+                        style={editButtonStyle}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        style={deleteButtonStyle}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -671,6 +678,7 @@ const editButtonStyle = {
   borderRadius: "4px",
   marginBottom: "6px",
   width: "100%",
+  maxWidth: "80px",
   cursor: "pointer",
 };
 
@@ -681,5 +689,6 @@ const deleteButtonStyle = {
   padding: "6px 12px",
   borderRadius: "4px",
   width: "100%",
+  maxWidth: "80px",
   cursor: "pointer",
 };
