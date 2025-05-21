@@ -528,6 +528,7 @@ export default function Candidates() {
                       "No adjunto"
                     )}
                   </td>
+
                   <td style={tdStyle}>
                     <button
                       onClick={() =>
